@@ -46,7 +46,7 @@ Window {
             left: parent.left
             right: parent.right
             top: parent.top
-            bottom: toolBar.bottom
+            bottom: toolBar.top
         }
 
         contextMenuPolicy: Qt.ActionsContextMenu
