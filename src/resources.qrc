@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>AboutDialog.qml</file>
+        <file>BookmarksPage.qml</file>
+	<file>BrowserWindow.qml</file>
+        <file>ConfirmDeleteDialog.qml</file>
+        <file>EditBookmarkDialog.qml</file>
+        <file>NewBookmarkDialog.qml</file>
+	<file>SettingsDialog.qml</file>
+	<file>UrlInputField.qml</file>
+	<file>CreateObject.js</file>
+    </qresource>
+</RCC>

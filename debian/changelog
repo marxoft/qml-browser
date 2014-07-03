@@ -1,0 +1,13 @@
+qml-browser (0.1.0) unstable; urgency=low
+
+  * Use separate browser windows (like MicroB).
+  * Update to comply with changes to qt-components-hildon.
+  * Bug fixes.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Thu, 03 Jul 2014 16:13:23 +0000
+
+qml-browser (0.0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Stuart Howarth <stuhowarth77@gmail.com>  Sun, 31 Mar 2013 19:45:48 +0000
