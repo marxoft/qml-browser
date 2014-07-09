@@ -124,7 +124,7 @@ Window {
         }
         icon: "general_fullsize"
         styleSheet: "background-color: transparent"
-        visible: window.fullScreen
+        visible: !toolBar.visible
         onClicked: window.fullScreen = false
     }
 
