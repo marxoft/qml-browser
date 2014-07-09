@@ -22,14 +22,6 @@ import "CreateObject.js" as ObjectCreator
 Page {
     id: page
 
-    function loadBrowserWindow(url) {
-        var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"), null);
-
-        if (url) {
-            browser.url = url;
-        }
-    }
-
     windowTitle: qsTr("Bookmarks")    
 
     ListView {
@@ -59,7 +51,10 @@ Page {
             }
         ]
 
-        onClicked: page.loadBrowserWindow(bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
+        onClicked: {
+            window.url = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
+            pageStack.pop();
+        }
     }
 
     Label {
