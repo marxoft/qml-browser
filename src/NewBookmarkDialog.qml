@@ -16,6 +16,7 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.utils 1.0
 
 Dialog {
     id: root
@@ -70,5 +71,14 @@ Dialog {
         else {
             infobox.showMessage(qsTr("Cannot add bookmark"));
         }
+    }
+
+    ScreenShot {
+        id: screenshot
+
+        target: webView
+        fileName: "/home/user/.config/QMLBrowser/" + Qt.md5(webView.url) + ".jpg"
+        overwriteExistingFile: true
+        smooth: true
     }
 }
