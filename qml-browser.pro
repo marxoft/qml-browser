@@ -5,7 +5,8 @@ QT += declarative xml
 SOURCES += src/main.cpp \
     src/bookmarksmodel.cpp
 
-HEADERS += src/bookmarksmodel.h
+HEADERS += src/bookmarksmodel.h \
+    src/cache.h
 
 RESOURCES += src/resources.qrc
 
