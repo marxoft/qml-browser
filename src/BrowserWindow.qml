@@ -88,8 +88,13 @@ Window {
         ToolButton {
             icon: "browser_history"
             onPressed: historyTimer.restart()
-            onReleased: historyTimer.stop()
-            onClicked: if (historyTimer.running) webView.back();
+            onReleased: {
+                if (historyTimer.running) {
+                    webView.back();
+                }
+
+                historyTimer.stop();
+            }
 
             Timer {
                 id: historyTimer
