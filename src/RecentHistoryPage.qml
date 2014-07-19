@@ -103,4 +103,19 @@ Page {
             }
         }
     }
+
+    Label {
+        anchors {
+            fill: parent
+            margins: 100
+        }
+        alignment: Qt.AlignCenter
+        font {
+            bold: true
+            pixelSize: 40
+        }
+        color: platformStyle.secondaryTextColor
+        text: qsTr("No recent history")
+        visible: window.viewHistory.count === 0
+    }
 }

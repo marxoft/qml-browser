@@ -37,4 +37,19 @@ Page {
             pageStack.pop(window);
         }
     }
+
+    Label {
+        anchors {
+            fill: parent
+            margins: 10
+        }
+        alignment: Qt.AlignCenter
+        font {
+            bold: true
+            pixelSize: 40
+        }
+        color: platformStyle.secondaryTextColor
+        text: qsTr("No history")
+        visible: webHistory.urls.length === 0
+    }
 }
