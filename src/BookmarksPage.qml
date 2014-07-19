@@ -53,7 +53,7 @@ Page {
 
         onClicked: {
             window.url = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
-            pageStack.pop();
+            pageStack.pop(window);
         }
     }
 
