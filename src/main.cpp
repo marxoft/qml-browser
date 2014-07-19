@@ -16,6 +16,7 @@
  */
 
 #include "bookmarksmodel.h"
+#include "cache.h"
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -30,6 +31,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     app.setApplicationName("Browser");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
+
+    Cache cache;
+    cache.create();
 
     BookmarksModel bookmarks;
     bookmarks.setFileName("/home/user/.config/QMLBrowser/bookmarks.xml");
@@ -47,6 +51,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
         return 0;
     }
+
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));
 
     return app.exec();
 }
