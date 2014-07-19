@@ -21,11 +21,6 @@ Page {
     id: root
 
     windowTitle: qsTr("Recent history")
-    tools: Action {
-        checkable: true
-        text: "Portrait"
-        onTriggered: screen.orientationLock = checked ? Screen.PortraitOrientation : Screen.LandscapeOrientation
-    }
 
     Column {
         id: column
