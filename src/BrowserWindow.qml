@@ -24,6 +24,8 @@ Window {
     id: window
 
     property alias url: webView.url
+    property alias viewHistory: webView.history
+    property alias viewSettings: webView.settings
 
     function loadBrowserWindow(url) {
         var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"), null);
@@ -59,6 +61,17 @@ Window {
             bottom: toolBar.visible ? toolBar.top : parent.bottom
         }
         onUrlChanged: urlInput.text = url
+        onStatusChanged: if (status == WebView.Ready) screenshot.grab();
+
+        MouseArea {
+            width: 5
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                right: parent.right
+            }
+            onExited: if (mouseX <= 0) pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {});
+        }
     }
 
     ToolBar {
@@ -72,9 +85,18 @@ Window {
         }
         visible: (!window.fullScreen) || (webView.status == WebView.Loading)
 
-        Action {
+        ToolButton {
             icon: "browser_history"
-            onTriggered: webView.back()
+            onPressed: historyTimer.restart()
+            onReleased: historyTimer.stop()
+            onClicked: if (historyTimer.running) webView.back();
+
+            Timer {
+                id: historyTimer
+
+                interval: 800
+                onTriggered: pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {})
+            }
         }
 
         Action {
@@ -149,7 +171,7 @@ Window {
         id: screenshot
 
         target: webView
-        fileName: "/home/user/.config/QMLBrowser/" + Qt.md5(webView.url) + ".jpg"
+        fileName: "/home/user/.config/QMLBrowser/.cache/" + Qt.md5(webView.url) + ".jpg"
         overwriteExistingFile: true
         smooth: true
     }
