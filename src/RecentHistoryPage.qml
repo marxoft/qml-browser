@@ -48,7 +48,6 @@ Page {
             height: column.height - toolButton.height - column.spacing
             flow: ListView.LeftToRight
             verticalScrollMode: ListView.ScrollPerItem
-            horizontalScrollMode: ListView.ScrollPerItem
             verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
             model: window.viewHistory.items
             delegate: ListItem {
