@@ -68,6 +68,8 @@ signals:
 private:
     QString m_fileName;
     QDomDocument m_document;
+
+    Q_DISABLE_COPY(BookmarksModel)
 };
 
 QML_DECLARE_TYPE(BookmarksModel)
