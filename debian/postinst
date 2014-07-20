@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+if [ ! -e /home/user/.config/QMLBrowser/searchengines.conf ]
+    then
+        echo "[DuckDuckGo]
+icon=duckduckgo.png
+url=https://duckduckgo.com/?q=%QUERY%
+
+[Google]
+icon=/usr/share/icons/hicolor/64x64/hildon/browser_search.png
+url=https://www.google.com/search?q=%QUERY%
+
+[Wikipedia]
+icon=wikipedia.png
+url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines.conf
+
+fi
+
+exit 0
