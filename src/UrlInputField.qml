@@ -49,6 +49,8 @@ TextField {
         return url;
     }
 
+    inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
     Image {
         id: progressIndicator
 
