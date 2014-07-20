@@ -8,7 +8,9 @@
         <file>EditBookmarkDialog.qml</file>
 	<file>FullHistoryPage.qml</file>
         <file>NewBookmarkDialog.qml</file>
+	<file>NewSearchEngineDialog.qml</file>
 	<file>RecentHistoryPage.qml</file>
+	<file>SearchEngineView.qml</file>
 	<file>SettingsDialog.qml</file>
 	<file>UrlInputField.qml</file>
 	<file>CreateObject.js</file>
