@@ -27,6 +27,28 @@ Page {
 
         anchors.fill: parent
         model: webHistory.urls.reverse()
+        delegate: ListItem {
+            width: view.width
+            height: 70
+
+            ListItemImage {
+                anchors.fill: parent
+                source: isCurrentItem ? "file:///etc/hildon/theme/images/TouchListBackgroundPressed.png"
+                                      : "file:///etc/hildon/theme/images/TouchListBackgroundNormal.png"
+            }
+
+            ListItemText {
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                    margins: 10
+                }
+                alignment: Qt.AlignLeft | Qt.AlignVCenter
+                text: modelData.display
+            }
+        }
         onClicked: {
             var url = view.model[QModelIndex.row(view.currentIndex)].toString();
 
