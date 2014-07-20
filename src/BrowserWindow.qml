@@ -48,6 +48,14 @@ Window {
             shortcut: "Ctrl+R"
             enabled: webView.status == WebView.Ready
             onTriggered: webView.reload()
+        },
+
+        Action {
+            text: qsTr("Add search engine")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("NewSearchEngineDialog.qml");
+                loader.item.open();
+            }
         }
     ]
 
@@ -60,7 +68,10 @@ Window {
             top: parent.top
             bottom: toolBar.visible ? toolBar.top : parent.bottom
         }
-        onUrlChanged: urlInput.text = url
+        onUrlChanged: {
+            urlInput.text = url;
+            searchEngineView.query = "";
+        }
         onStatusChanged: if (status == WebView.Ready) screenshot.grab();
 
         MouseArea {
@@ -74,6 +85,24 @@ Window {
         }
     }
 
+    SearchEngineView {
+        id: searchEngineView
+
+        maximumHeight: 150
+        anchors {
+            left: parent.left
+            leftMargin: 10
+            right: parent.right
+            rightMargin: 10
+            bottom: toolBar.top
+        }
+        visible: (searchEngines.count) && (query)
+        onClicked: {
+            window.loadBrowserWindow(searchEngines.data(currentIndex, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
+            urlInput.clear();
+        }
+    }
+
     ToolBar {
         id: toolBar
 
@@ -83,6 +112,7 @@ Window {
             right: parent.right
             bottom: parent.bottom
         }
+        movable: false
         visible: (!window.fullScreen) || (webView.status == WebView.Loading)
 
         ToolButton {
@@ -121,6 +151,7 @@ Window {
             height: 80
             showProgressIndicator: webView.status == WebView.Loading
             progress: webView.progress
+            onTextEdited: searchEngineView.query = text
             onReturnPressed: webView.url = urlFromTextInput(text)
         }
 

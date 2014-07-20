@@ -31,13 +31,23 @@ Window {
     }
 
     windowTitle: "Browser"
-    tools: Action {
-        text: qsTr("About")
-        onTriggered: {
-            loader.source = Qt.resolvedUrl("AboutDialog.qml");
-            loader.item.open();
+    tools: [
+        Action {
+            text: qsTr("Add search engine")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("NewSearchEngineDialog.qml");
+                loader.item.open();
+            }
+        },
+
+        Action {
+            text: qsTr("About")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("AboutDialog.qml");
+                loader.item.open();
+            }
         }
-    }
+    ]
 
     ListView {
         id: view
@@ -90,6 +100,25 @@ Window {
         visible: bookmarks.count === 0
     }
 
+    SearchEngineView {
+        id: searchEngineView
+
+        maximumHeight: 150
+        anchors {
+            left: parent.left
+            leftMargin: 10
+            right: parent.right
+            rightMargin: 10
+            bottom: toolBar.top
+        }
+        query: urlInput.text
+        visible: (searchEngines.count) && (query)
+        onClicked: {
+            window.loadBrowserWindow(searchEngines.data(currentIndex, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
+            urlInput.clear();
+        }
+    }
+
     ToolBar {
         id: toolBar
 
@@ -99,6 +128,7 @@ Window {
             right: parent.right
             bottom: parent.bottom
         }
+        movable: false
 
         UrlInputField {
             id: urlInput

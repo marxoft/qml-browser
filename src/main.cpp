@@ -17,6 +17,7 @@
 
 #include "bookmarksmodel.h"
 #include "cache.h"
+#include "searchenginemodel.h"
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -31,15 +32,22 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     app.setApplicationName("Browser");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
+    qmlRegisterUncreatableType<SearchEngineModel>("org.hildon.browser", 1, 0, "SearchEngineModel", "");
 
     Cache cache;
     cache.create();
 
     BookmarksModel bookmarks;
     bookmarks.setFileName("/home/user/.config/QMLBrowser/bookmarks.xml");
+    bookmarks.load();
+
+    SearchEngineModel searchEngines;
+    searchEngines.setFileName("/home/user/.config/QMLBrowser/searchengines.conf");
+    searchEngines.load();
 
     QDeclarativeEngine engine;
     engine.rootContext()->setContextProperty("bookmarks", &bookmarks);
+    engine.rootContext()->setContextProperty("searchEngines", &searchEngines);
 
     QDeclarativeComponent component(&engine, QUrl("qrc:/main.qml"));
     component.create();
