@@ -31,7 +31,8 @@ class BookmarksModel : public QAbstractListModel
                NOTIFY countChanged)
     Q_PROPERTY(QString fileName
                READ fileName
-               WRITE setFileName)
+               WRITE setFileName
+               NOTIFY fileNameChanged)
 
     Q_ENUMS(Roles)
 
@@ -58,12 +59,13 @@ public:
     Q_INVOKABLE bool removeBookmark(const QModelIndex &index);
     Q_INVOKABLE bool removeBookmark(int row);
 
-private:
-    void loadBookmarks();
-    bool saveBookmarks();
+public slots:
+    void load();
+    bool save();
 
 signals:
-    void countChanged(int count);
+    void countChanged();
+    void fileNameChanged();
     
 private:
     QString m_fileName;

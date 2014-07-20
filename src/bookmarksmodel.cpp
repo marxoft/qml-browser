@@ -37,7 +37,7 @@ BookmarksModel::~BookmarksModel() {}
 void BookmarksModel::setFileName(const QString &fileName) {
     if (fileName != this->fileName()) {
         m_fileName = fileName;
-        this->loadBookmarks();
+        emit fileNameChanged();
     }
 }
 
@@ -92,7 +92,7 @@ bool BookmarksModel::setData(const QModelIndex &index, const QVariant &value, in
     }
 
     emit dataChanged(index, index);
-    return this->saveBookmarks();
+    return this->save();
 }
 
 bool BookmarksModel::addBookmark(const QString &title, const QString &icon, const QString &url) {
@@ -117,8 +117,8 @@ bool BookmarksModel::addBookmark(const QString &title, const QString &icon, cons
     this->endInsertRows();
 
     if (!newChild.isNull()) {
-        emit countChanged(this->rowCount());
-        return this->saveBookmarks();
+        emit countChanged();
+        return this->save();
     }
 
     return false;
@@ -134,8 +134,8 @@ bool BookmarksModel::removeBookmark(const QString &url) {
             this->endRemoveRows();
 
             if (!removedChild.isNull()) {
-                emit countChanged(this->rowCount());
-                return this->saveBookmarks();
+                emit countChanged();
+                return this->save();
             }
 
             return false;
@@ -157,29 +157,29 @@ bool BookmarksModel::removeBookmark(int row) {
     this->endRemoveRows();
 
     if (!removedChild.isNull()) {
-        emit countChanged(this->rowCount());
-        return this->saveBookmarks();
+        emit countChanged();
+        return this->save();
     }
 
     return false;
 }
 
-void BookmarksModel::loadBookmarks() {
+void BookmarksModel::load() {
     QDir().mkpath(this->fileName().left(this->fileName().lastIndexOf('/')));
     QFile file(this->fileName());
 
     if ((file.exists()) && (file.open(QIODevice::ReadOnly)) && (m_document.setContent(&file)) && (this->rowCount() > 0)) {
-        emit countChanged(this->rowCount());
+        emit countChanged();
     }
     else {
         QByteArray doc("<xbel version=\"1.0\"></xbel>");
         m_document.setContent(doc);
-        this->saveBookmarks();
-        emit countChanged(this->rowCount());
+        this->save();
+        emit countChanged();
     }
 }
 
-bool BookmarksModel::saveBookmarks() {
+bool BookmarksModel::save() {
     QFile file(this->fileName());
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
