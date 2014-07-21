@@ -134,10 +134,14 @@ void SearchEngineModel::load() {
     foreach (QString group, groups) {
         settings.beginGroup(group);
 
-        QString icon = dir.absoluteFilePath(settings.value("icon").toString());
+        QString icon = settings.value("icon").toString();
+
+        if (!icon.isEmpty()) {
+            icon = dir.absoluteFilePath(icon);
+        }
 
         if (!dir.exists(icon)) {
-            icon = "/usr/share/icons/hicolor/64x64/hildon/general_web.png";
+            icon = "/usr/share/icons/hicolor/48x48/hildon/general_web.png";
         }
 
         SearchEngine se;
@@ -148,6 +152,11 @@ void SearchEngineModel::load() {
 
         settings.endGroup();
     }
+
+    SearchEngine se;
+    se.name = tr("Add search engine");
+    se.icon = "/usr/share/icons/hicolor/48x48/hildon/general_add.png";
+    m_list.append(se);
 
     this->endResetModel();
     emit countChanged();
