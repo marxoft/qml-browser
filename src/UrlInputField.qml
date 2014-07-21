@@ -50,6 +50,7 @@ TextField {
     }
 
     inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+    onFocusChanged: if (focus) selectAll();
 
     Image {
         id: progressIndicator
