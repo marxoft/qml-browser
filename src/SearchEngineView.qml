@@ -48,7 +48,7 @@ ListView {
             smooth: true
         }
     }
-    onQueryChanged: { view.height += 1; view.height -= 1 } // Hotfix to ensure the delegate paint() method is called.
+    onQueryChanged: { height += 1; height -= 1 } // Hotfix to ensure the delegate paint() method is called.
     onClicked: {
         switch (QModelIndex.row(currentIndex)) {
         case searchEngines.count - 1:
