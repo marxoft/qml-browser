@@ -33,7 +33,7 @@ Dialog {
 
         Label {
             wordWrap: true
-            text: "<b><font size='4'>QML Browser 0.2.0</font></b><br><br>" + qsTr("A simple web browser written using Qt Components Hildon.")
+            text: "<b><font size='4'>QML Browser 0.3.0</font></b><br><br>" + qsTr("A simple web browser written using Qt Components Hildon.")
         }
     }
 
