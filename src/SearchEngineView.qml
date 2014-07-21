@@ -6,6 +6,9 @@ ListView {
 
     property string query
 
+    visible: (searchEngines.count) && (query) && ((focus) || (urlInput.focus))
+    maximumHeight: Math.min(searchEngines.count, 3) * 70
+    styleSheet: "background-color: " + platformStyle.defaultBackgroundColor + "; border: 1px solid " + platformStyle.disabledTextColor + ";"
     model: searchEngines
     horizontalScrollMode: ListView.ScrollPerItem
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
@@ -28,14 +31,14 @@ ListView {
                 margins: 10
             }
             alignment: Qt.AlignLeft | Qt.AlignVCenter
-            text: modelData.name + " " + qsTr("Search") + ": '" + view.query + "'"
+            text: modelData.name + (row === searchEngines.count - 1 ? "" : " " + qsTr("Search") + ": '" + view.query + "'")
         }
 
         ListItemImage {
             id: image
 
-            width: 64
-            height: 64
+            width: 48
+            height: 48
             anchors {
                 right: parent.right
                 rightMargin: 10
@@ -46,4 +49,20 @@ ListView {
         }
     }
     onQueryChanged: { view.height += 1; view.height -= 1 } // Hotfix to ensure the delegate paint() method is called.
+    onClicked: {
+        switch (QModelIndex.row(currentIndex)) {
+        case searchEngines.count - 1:
+        {
+            loader.source = Qt.resolvedUrl("NewSearchEngineDialog.qml");
+            loader.item.open();
+            break;
+        }
+        default:
+        {
+            window.loadBrowserWindow(searchEngines.data(currentIndex, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
+            urlInput.clear();
+            break;
+        }
+        }
+    }
 }

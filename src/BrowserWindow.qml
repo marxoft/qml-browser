@@ -48,14 +48,6 @@ Window {
             shortcut: "Ctrl+R"
             enabled: webView.status == WebView.Ready
             onTriggered: webView.reload()
-        },
-
-        Action {
-            text: qsTr("Add search engine")
-            onTriggered: {
-                loader.source = Qt.resolvedUrl("NewSearchEngineDialog.qml");
-                loader.item.open();
-            }
         }
     ]
 
@@ -88,18 +80,12 @@ Window {
     SearchEngineView {
         id: searchEngineView
 
-        maximumHeight: 150
         anchors {
             left: parent.left
             leftMargin: 10
             right: parent.right
             rightMargin: 10
             bottom: toolBar.top
-        }
-        visible: (searchEngines.count) && (query)
-        onClicked: {
-            window.loadBrowserWindow(searchEngines.data(currentIndex, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
-            urlInput.clear();
         }
     }
 
