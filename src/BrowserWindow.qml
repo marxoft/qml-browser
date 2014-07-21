@@ -62,6 +62,7 @@ Window {
         }
         onUrlChanged: {
             urlInput.text = url;
+            urlInput.cursorPosition = 0;
             searchEngineView.query = "";
         }
         onStatusChanged: if (status == WebView.Ready) screenshot.grab();
@@ -139,6 +140,12 @@ Window {
             progress: webView.progress
             onTextEdited: searchEngineView.query = text
             onReturnPressed: webView.url = urlFromTextInput(text)
+
+            Timer {
+                interval: 50
+                running: urlInput.focus
+                onTriggered: urlInput.selectAll()
+            }
         }
 
         Action {
