@@ -8,10 +8,6 @@ if [ ! -e /home/user/.config/QMLBrowser/searchengines.conf ]
 icon=duckduckgo.png
 url=https://duckduckgo.com/?q=%QUERY%
 
-[Google]
-icon=/usr/share/icons/hicolor/48x48/hildon/browser_search.png
-url=https://www.google.com/search?q=%QUERY%
-
 [Wikipedia]
 icon=wikipedia.png
 url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines.conf' - user
