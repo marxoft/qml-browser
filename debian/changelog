@@ -1,3 +1,10 @@
+qml-browser (0.3.0) unstable; urgency=low
+
+  * Added options to choose the search engine and add additional search engines. Search engines can be added in the user interface, or by manually editing /home/user/.config/QMLBrowser/searchengines.conf.
+  * Changed input method hints for the URL input field to avoid auto-capitalisation.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Sun, 20 Jul 2014 23:19:31 +0000
+
 qml-browser (0.2.0) unstable; urgency=low
 
   * Access browsing history with long-press on 'back' button or swipe from right.
