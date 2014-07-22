@@ -140,7 +140,7 @@ void SearchEngineModel::load() {
             icon = dir.absoluteFilePath(icon);
         }
 
-        if (!dir.exists(icon)) {
+        if ((icon.isEmpty()) || (!dir.exists(icon))) {
             icon = "/usr/share/icons/hicolor/48x48/hildon/general_web.png";
         }
 
