@@ -1,6 +1,9 @@
 qml-browser (0.3.0) unstable; urgency=low
 
   * Added options to choose the search engine and add additional search engines. Search engines can be added in the user interface, or by manually editing /home/user/.config/QMLBrowser/searchengines.conf.
+  * Added access to browsing history from the URL input field.
+  * Added support for opening URLs in a new browser window.
+  * Added support for custom URL handlers. Handlers are defined in /home/user/.config/QMLBrowser/urlhandlers.conf.
   * Changed input method hints for the URL input field to avoid auto-capitalisation.
 
  -- Stuart Howarth <showarth@marxoft.co.uk>  Sun, 20 Jul 2014 23:19:31 +0000
