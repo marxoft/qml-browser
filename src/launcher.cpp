@@ -92,7 +92,7 @@ bool Launcher::canLaunch(const QString &url) const {
 bool Launcher::launch(const QString &url) {
     foreach (Handler handler, m_handlers) {
         if (handler.regExp.indexIn(url) == 0) {
-            QString command = QString(handler.command).replace("%URL%", url).replace('"', "\\\"");
+            QString command = QString(handler.command).replace("%URL%", url);
             qDebug() << "Launching" << url << "with command" << command;
             QProcess *process = new QProcess(this);
             this->connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
