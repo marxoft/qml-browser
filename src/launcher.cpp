@@ -52,6 +52,14 @@ void Launcher::loadHandlers() {
     }
 }
 
+void Launcher::addHandler(const QString &name, const QString &regExp, const QString &command) {
+    QSettings settings("/home/user/.config/QMLBrowser/urlhandlers.conf", QSettings::NativeFormat);
+    settings.beginGroup(name);
+    settings.setValue("regExp", regExp);
+    settings.setValue("command", command);
+    settings.endGroup();
+}
+
 QString Launcher::handler(const QString &url) const {
     foreach (Handler handler, m_handlers) {
         if (handler.regExp.indexIn(url) == 0) {
