@@ -37,7 +37,7 @@ public:
 
     Q_INVOKABLE void loadHandlers();
 
-    Q_INVOKABLE void addHandler(const QString &name, const QString &regExp, const QString &command);
+    Q_INVOKABLE bool addHandler(const QString &name, const QString &regExp, const QString &command);
 
     Q_INVOKABLE QString handler(const QString &url) const;
 

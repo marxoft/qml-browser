@@ -42,7 +42,7 @@ void Launcher::loadHandlers() {
             handler.regExp = re;
             handler.command = command;
             m_handlers.append(handler);
-            qDebug() << "Adding handler" << group << re.pattern() << command;
+            qDebug() << "Handler added" << group << re.pattern() << command;
         }
         else {
             qDebug() << "Cannot add handler" << group << re.pattern() << command;
@@ -52,12 +52,27 @@ void Launcher::loadHandlers() {
     }
 }
 
-void Launcher::addHandler(const QString &name, const QString &regExp, const QString &command) {
-    QSettings settings("/home/user/.config/QMLBrowser/urlhandlers.conf", QSettings::NativeFormat);
-    settings.beginGroup(name);
-    settings.setValue("regExp", regExp);
-    settings.setValue("command", command);
-    settings.endGroup();
+bool Launcher::addHandler(const QString &name, const QString &regExp, const QString &command) {
+    QRegExp re(regExp);
+
+    if ((re.isValid()) && (!command.isEmpty())) {
+        Handler handler;
+        handler.name = name;
+        handler.regExp = re;
+        handler.command = command;
+        m_handlers.append(handler);
+
+        QSettings settings("/home/user/.config/QMLBrowser/urlhandlers.conf", QSettings::NativeFormat);
+        settings.beginGroup(name);
+        settings.setValue("regExp", regExp);
+        settings.setValue("command", command);
+        settings.endGroup();
+        qDebug() << "Handler added" << name << re.pattern() << command;
+        return true;
+    }
+
+    qDebug() << "Cannot add handler" << name << re.pattern() << command;
+    return false;
 }
 
 QString Launcher::handler(const QString &url) const {
