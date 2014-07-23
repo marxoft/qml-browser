@@ -39,7 +39,6 @@ Dialog {
 
         Button {
             text: qsTr("Add custom URL handler")
-            enabled: handlersCheckbox.checked
             onClicked: {
                 loader.source = Qt.resolvedUrl("NewUrlHandlerDialog.qml");
                 loader.item.open();
@@ -66,6 +65,10 @@ Dialog {
     onAccepted: {
         qmlBrowserSettings.useCustomURLHandlers = handlersCheckbox.checked;
         qmlBrowserSettings.javaScriptEnabled = jsCheckbox.checked;
+    }
+    onRejected: {
+        handlersCheckbox = qmlBrowserSettings.useCustomURLHandlers;
+        jsCheckbox.checked = qmlBrowserSettings.javaScriptEnabled;
     }
 
     Loader {
