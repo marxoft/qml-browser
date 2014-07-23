@@ -21,35 +21,54 @@ import org.hildon.utils 1.0
 Dialog {
     id: root
 
-    height: window.inPortrait ? 180 : 80
+    height: window.inPortrait ? 420 : 320
     windowTitle: qsTr("Settings")
     content: Column {
         anchors.fill: parent
 
-        ValueButton {
-            text: qsTr("Screen orientation")
-            selector: ListSelector {
-                model: [ qsTr("Landscape"), qsTr("Portrait"), qsTr("Automatic") ]
-                currentIndex: settings.screenOrientation === Screen.AutoOrientation ? 2 : settings.screenOrientation === Screen.PortraitOrientation ? 1 : 0
-                onSelected: {
-                    switch (currentIndex) {
-                    case 1:
-                        settings.screenOrientation = Screen.PortraitOrientation;
-                        return;
-                    case 2:
-                        settings.screenOrientation = Screen.AutoOrientation;
-                        return;
-                    default:
-                        settings.screenOrientation = Screen.LandscapeOrientation;
-                        return;
-                    }
-                }
+        Label {
+            text: qsTr("General")
+        }
+
+        CheckBox {
+            id: handlersCheckbox
+
+            text: qsTr("Use custom URL handlers")
+            checked: qmlBrowserSettings.useCustomURLHandlers
+        }
+
+        Button {
+            text: qsTr("Add custom URL handler")
+            enabled: handlersCheckbox.checked
+            onClicked: {
+                loader.source = Qt.resolvedUrl("NewUrlHandlerDialog.qml");
+                loader.item.open();
             }
+        }
+
+        Label {
+            text: qsTr("Content")
+        }
+
+        CheckBox {
+            id: jsCheckbox
+
+            text: qsTr("Enable JavaScript")
+            checked: qmlBrowserSettings.javaScriptEnabled
         }
     }
 
     buttons: Button {
-        text: qsTr("Done")
+        text: qsTr("Save")
         onClicked: root.accept()
+    }
+
+    onAccepted: {
+        qmlBrowserSettings.useCustomURLHandlers = handlersCheckbox.checked;
+        qmlBrowserSettings.javaScriptEnabled = jsCheckbox.checked;
+    }
+
+    Loader {
+        id: loader
     }
 }

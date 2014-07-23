@@ -63,8 +63,13 @@ Dialog {
     }
 
     onAccepted: {
-        launcher.addHandler(nameInput.text, regexpInput.text, commandInput.text);
-        infobox.showMessage(qsTr("URL handler added"));
+        if (launcher.addHandler(nameInput.text, regexpInput.text, commandInput.text)) {
+            infobox.showMessage(qsTr("URL handler added"));
+        }
+        else {
+            infobox.showMessage(qsTr("Cannot add URL handler"));
+        }
+
         nameInput.clear();
         regexpInput.clear();
         commandInput.clear();

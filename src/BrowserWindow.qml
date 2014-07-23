@@ -48,6 +48,14 @@ Window {
             shortcut: "Ctrl+R"
             enabled: webView.status == WebView.Ready
             onTriggered: webView.reload()
+        },
+
+        Action {
+            text: qsTr("Settings")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("SettingsDialog.qml");
+                loader.item.open();
+            }
         }
     ]
 
@@ -60,9 +68,10 @@ Window {
             top: parent.top
             bottom: toolBar.visible ? toolBar.top : parent.bottom
         }
+        settings.javascriptEnabled: qmlBrowserSettings.javaScriptEnabled
         newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
         linkDelegationPolicy: WebView.DelegateAllLinks
-        onLinkClicked: if (!launcher.launch(link)) url = link;
+        onLinkClicked: if ((!qmlBrowserSettings.useCustomURLHandlers) || (!launcher.launch(link))) url = link;
         onUrlChanged: {
             urlInput.text = url;
             urlInput.cursorPosition = 0;

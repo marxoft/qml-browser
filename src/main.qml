@@ -32,13 +32,23 @@ Window {
     }
 
     windowTitle: "Browser"
-    tools: Action {
-        text: qsTr("About")
-        onTriggered: {
-            loader.source = Qt.resolvedUrl("AboutDialog.qml");
-            loader.item.open();
+    tools: [
+        Action {
+            text: qsTr("Settings")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("SettingsDialog.qml");
+                loader.item.open();
+            }
+        },
+
+        Action {
+            text: qsTr("About")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("AboutDialog.qml");
+                loader.item.open();
+            }
         }
-    }
+    ]
 
     ListView {
         id: view

@@ -5,12 +5,14 @@ QT += declarative xml
 SOURCES += src/main.cpp \
     src/bookmarksmodel.cpp \
     src/launcher.cpp \
-    src/searchenginemodel.cpp
+    src/searchenginemodel.cpp \
+    src/settings.cpp
 
 HEADERS += src/bookmarksmodel.h \
     src/cache.h \
     src/launcher.h \
-    src/searchenginemodel.h
+    src/searchenginemodel.h \
+    src/settings.h
 
 RESOURCES += src/resources.qrc
 

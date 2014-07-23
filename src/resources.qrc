@@ -10,6 +10,7 @@
 	<file>HistoryView.qml</file>
         <file>NewBookmarkDialog.qml</file>
 	<file>NewSearchEngineDialog.qml</file>
+	<file>NewUrlHandlerDialog.qml</file>
 	<file>RecentHistoryPage.qml</file>
 	<file>SearchEngineView.qml</file>
 	<file>SettingsDialog.qml</file>

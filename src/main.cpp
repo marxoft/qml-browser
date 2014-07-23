@@ -19,6 +19,7 @@
 #include "cache.h"
 #include "launcher.h"
 #include "searchenginemodel.h"
+#include "settings.h"
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -41,6 +42,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     Launcher launcher;
     launcher.loadHandlers();
 
+    Settings settings;
+
     BookmarksModel bookmarks;
     bookmarks.setFileName("/home/user/.config/QMLBrowser/bookmarks.xml");
     bookmarks.load();
@@ -53,6 +56,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("launcher", &launcher);
     engine.rootContext()->setContextProperty("bookmarks", &bookmarks);
     engine.rootContext()->setContextProperty("searchEngines", &searchEngines);
+    engine.rootContext()->setContextProperty("qmlBrowserSettings", &settings);
 
     QDeclarativeComponent component(&engine, QUrl("qrc:/main.qml"));
     component.create();
