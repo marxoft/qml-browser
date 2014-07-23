@@ -31,7 +31,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     app.setOrganizationName("QMLBrowser");
-    app.setApplicationName("Browser");
+    app.setApplicationName("QML Browser");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
     qmlRegisterUncreatableType<SearchEngineModel>("org.hildon.browser", 1, 0, "SearchEngineModel", "");

@@ -31,7 +31,7 @@ Window {
         }
     }
 
-    windowTitle: "Browser"
+    windowTitle: "QML Browser"
     tools: [
         Action {
             text: qsTr("Settings")

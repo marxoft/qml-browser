@@ -35,7 +35,7 @@ Window {
         }
     }
 
-    windowTitle: webView.title ? webView.title : "Browser"
+    windowTitle: webView.title ? webView.title : "QML Browser"
     tools: [
         Action {
             text: qsTr("New window")
