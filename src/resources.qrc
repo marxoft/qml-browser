@@ -7,6 +7,7 @@
         <file>ConfirmDeleteDialog.qml</file>
         <file>EditBookmarkDialog.qml</file>
 	<file>FullHistoryPage.qml</file>
+	<file>HistoryView.qml</file>
         <file>NewBookmarkDialog.qml</file>
 	<file>NewSearchEngineDialog.qml</file>
 	<file>RecentHistoryPage.qml</file>
