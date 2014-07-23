@@ -16,6 +16,7 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.webkit 1.0
 
 Page {
     id: root
@@ -50,12 +51,7 @@ Page {
             }
         }
         onClicked: {
-            var url = view.model[QModelIndex.row(view.currentIndex)].toString();
-
-            if (url !== window.url.toString()) {
-                window.url = url;
-            }
-
+            window.url = view.model[QModelIndex.row(view.currentIndex)];
             pageStack.pop(window);
         }
     }

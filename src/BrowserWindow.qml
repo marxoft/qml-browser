@@ -60,10 +60,13 @@ Window {
             top: parent.top
             bottom: toolBar.visible ? toolBar.top : parent.bottom
         }
+        newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
+        linkDelegationPolicy: WebView.DelegateAllLinks
+        onLinkClicked: if (!launcher.launch(link)) url = link;
         onUrlChanged: {
             urlInput.text = url;
             urlInput.cursorPosition = 0;
-            searchEngineView.query = "";
+            viewLoader.source = "";
         }
         onStatusChanged: if (status == WebView.Ready) screenshot.grab();
 
@@ -78,22 +81,9 @@ Window {
         }
     }
 
-    SearchEngineView {
-        id: searchEngineView
-
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            right: parent.right
-            rightMargin: 10
-            bottom: toolBar.top
-        }
-    }
-
     ToolBar {
         id: toolBar
 
-        height: 80
         anchors {
             left: parent.left
             right: parent.right
@@ -135,10 +125,20 @@ Window {
         UrlInputField {
             id: urlInput            
 
-            height: 80
             showProgressIndicator: webView.status == WebView.Loading
             progress: webView.progress
-            onTextEdited: searchEngineView.query = text
+            comboboxEnabled: webHistory.count > 0
+            onComboboxTriggered: viewLoader.source = (viewLoader.item ? "" : Qt.resolvedUrl("HistoryView.qml"))
+            onTextEdited: {
+                if (text) {
+                    viewLoader.source = Qt.resolvedUrl("SearchEngineView.qml");
+                    viewLoader.item.query = text;
+                }
+                else {
+                    viewLoader.source = "";
+                }
+            }
+            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.source = "";
             onReturnPressed: webView.url = urlFromTextInput(text)
 
             Timer {
@@ -203,6 +203,10 @@ Window {
         fileName: "/home/user/.config/QMLBrowser/.cache/" + Qt.md5(webView.url) + ".jpg"
         overwriteExistingFile: true
         smooth: true
+    }
+
+    Loader {
+        id: viewLoader
     }
 
     Loader {

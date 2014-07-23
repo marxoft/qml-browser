@@ -16,12 +16,16 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.browser 1.0
 
 TextField {
     id: root
 
     property bool showProgressIndicator: false
     property real progress
+    property alias comboboxEnabled: combobox.enabled
+
+    signal comboboxTriggered
 
     function setUrl(url) {
         if (url) {
@@ -39,7 +43,11 @@ TextField {
         }
         if (url.indexOf(":") < 0) {
             if ((url.indexOf(".") < 0) || (url.indexOf(" ") >= 0)) {
-                return "https://duckduckgo.com?q=" + url;
+                if (searchEngines.count > 1) {
+                    return searchEngines.data(0, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, url.replace(/\s+/g, "+"));
+                }
+
+                return "https://duckduckgo.com?q=" + url.replace(/\s+/g, "+");
             }
             else {
                 return "http://" + url;
@@ -50,11 +58,35 @@ TextField {
     }
 
     inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+    rightMargin: 50
+
+    Image {
+        id: combobox
+
+        width: 60
+        height: 70
+        anchors {
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
+
+        source: "image://theme/ComboBoxButton" + (mouseArea.pressed ? "Pressed" : enabled ? "Normal" : "Disabled")
+
+        MouseArea {
+            id: mouseArea
+
+            width: 60
+            height: 70
+            anchors.centerIn: parent
+            preventStealing: true
+            onClicked: root.comboboxTriggered()
+        }
+    }
 
     Image {
         id: progressIndicator
 
-        width: visible ? Math.floor((parent.width - 40) * root.progress / 100) : 0
+        width: visible ? Math.floor((parent.width - 80) * root.progress / 100) : 0
         anchors {
             top: parent.top
             bottom: parent.bottom

@@ -16,6 +16,7 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.webkit 1.0
 
 Page {
     id: root

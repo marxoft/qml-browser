@@ -16,6 +16,7 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.webkit 1.0
 import org.hildon.browser 1.0
 import "CreateObject.js" as ObjectCreator
 
@@ -90,23 +91,9 @@ Window {
         visible: bookmarks.count === 0
     }
 
-    SearchEngineView {
-        id: searchEngineView
-
-        anchors {
-            left: parent.left
-            leftMargin: 10
-            right: parent.right
-            rightMargin: 10
-            bottom: toolBar.top
-        }
-        query: urlInput.text
-    }
-
     ToolBar {
         id: toolBar
 
-        height: 80
         anchors {
             left: parent.left
             right: parent.right
@@ -117,7 +104,18 @@ Window {
         UrlInputField {
             id: urlInput
 
-            height: 80
+            comboboxEnabled: webHistory.count > 0
+            onComboboxTriggered: viewLoader.source = (viewLoader.item ? "" : Qt.resolvedUrl("HistoryView.qml"))
+            onTextEdited: {
+                if (text) {
+                    viewLoader.source = Qt.resolvedUrl("SearchEngineView.qml");
+                    viewLoader.item.query = text;
+                }
+                else {
+                    viewLoader.source = "";
+                }
+            }
+            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.source = "";
             onReturnPressed: {
                 window.loadBrowserWindow(urlFromTextInput(text));
                 clear();
@@ -140,6 +138,10 @@ Window {
             alignment: Qt.AlignCenter
             color: platformStyle.notificationTextColor
         }
+    }
+
+    Loader {
+        id: viewLoader
     }
 
     Loader {
