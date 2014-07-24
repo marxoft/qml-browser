@@ -104,6 +104,7 @@ Window {
     ToolBar {
         id: toolBar
 
+        height: 75
         anchors {
             left: parent.left
             right: parent.right
