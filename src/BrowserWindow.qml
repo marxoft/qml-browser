@@ -39,15 +39,19 @@ Window {
     tools: [
         Action {
             text: qsTr("New window")
-            shortcut: "Ctrl+N"
             onTriggered: window.loadBrowserWindow()
         },
 
         Action {
             text: qsTr("Reload")
-            shortcut: "Ctrl+R"
             enabled: webView.status == WebView.Ready
             onTriggered: webView.reload()
+        },
+
+        Action {
+            text: qsTr("Find on page")
+            enabled: webView.status == WebView.Ready
+            onTriggered: findToolBar.visible = true
         },
 
         Action {
@@ -59,6 +63,40 @@ Window {
         }
     ]
 
+    actions: [
+        Action {
+            shortcut: "Ctrl+N"
+            onTriggered: window.loadBrowserWindow()
+        },
+
+        Action {
+            shortcut: "Ctrl+R"
+            enabled: webView.status == WebView.Ready
+            onTriggered: webView.reload()
+        },
+
+        Action {
+            shortcut: "Ctrl+F"
+            enabled: webView.status == WebView.Ready
+            onTriggered: findToolBar.visible = true
+        },
+
+        Action {
+            shortcut: "Ctrl+D"
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("NewBookmarkDialog.qml");
+                loader.item.name = webView.title;
+                loader.item.address = webView.url;
+                loader.item.open();
+            }
+        },
+
+        Action {
+            shortcut: "Ctrl+B"
+            onTriggered: pageStack.push(Qt.resolvedUrl("BookmarksPage.qml"), {})
+        }
+    ]
+
     WebView {
         id: webView
 
@@ -66,7 +104,7 @@ Window {
             left: parent.left
             right: parent.right
             top: parent.top
-            bottom: toolBar.visible ? toolBar.top : parent.bottom
+            bottom: findToolBar.visible ? findToolBar.top : toolBar.visible ? toolBar.top : parent.bottom
         }
         settings.javascriptEnabled: qmlBrowserSettings.javaScriptEnabled
         newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
@@ -91,8 +129,38 @@ Window {
     }
 
     ToolBar {
+        id: findToolBar
+
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: toolBar.visible ? toolBar.top : parent.bottom
+        }
+        movable: false
+        visible: false
+
+        Label {
+            alignment: Qt.AlignLeft | Qt.AlignVCenter
+            text: qsTr("Find") + ": "
+        }
+
+        TextField {
+            onReturnPressed: if (!webView.findText(text)) infobox.showMessage(qsTr("No matches found"));
+        }
+
+        Action {
+            icon: "general_close"
+            onTriggered: {
+                webView.findText("");
+                findToolBar.visible = false;
+            }
+        }
+    }
+
+    ToolBar {
         id: toolBar
 
+        height: 75
         anchors {
             left: parent.left
             right: parent.right
@@ -122,7 +190,6 @@ Window {
 
         Action {
             icon: "general_add"
-            shortcut: "Ctrl+D"
             onTriggered: {
                 loader.source = Qt.resolvedUrl("NewBookmarkDialog.qml");
                 loader.item.name = webView.title;
@@ -132,7 +199,7 @@ Window {
         }
 
         UrlInputField {
-            id: urlInput            
+            id: urlInput
 
             showProgressIndicator: webView.status == WebView.Loading
             progress: webView.progress
@@ -165,7 +232,6 @@ Window {
 
         Action {
             icon: "general_mybookmarks_folder"
-            shortcut: "Ctrl+B"
             onTriggered: pageStack.push(Qt.resolvedUrl("BookmarksPage.qml"), {})
         }
 
