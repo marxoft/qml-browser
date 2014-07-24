@@ -58,8 +58,8 @@ ListView {
     }
     onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.source = "";
     onClicked: {
-        if (webView) {
-            webView.url = view.model[QModelIndex.row(view.currentIndex)];
+        if (window.url) {
+            window.url = view.model[QModelIndex.row(view.currentIndex)];
         }
         else {
             window.loadBrowserWindow(view.model[QModelIndex.row(view.currentIndex)]);
