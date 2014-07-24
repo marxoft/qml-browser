@@ -57,6 +57,7 @@ TextField {
         return url;
     }
 
+    height: parent.height
     inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
     rightMargin: 50
 
