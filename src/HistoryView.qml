@@ -29,6 +29,7 @@ ListView {
         bottom: toolBar.top
     }
     focus: true
+    interactive: false
     height: Math.min(webHistory.count * 70, 280)
     styleSheet: "background-color: " + platformStyle.defaultBackgroundColor + "; border: 1px solid " + platformStyle.disabledTextColor + ";"
     model: webHistory.urls.reverse()
