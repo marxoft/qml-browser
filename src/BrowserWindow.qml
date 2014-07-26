@@ -106,6 +106,8 @@ Window {
             top: parent.top
             bottom: findToolBar.visible ? findToolBar.top : toolBar.visible ? toolBar.top : parent.bottom
         }
+        interactive: !panningArea.pointerOn
+        textSelectionEnabled: panningArea.panningOn
         settings.javascriptEnabled: qmlBrowserSettings.javaScriptEnabled
         newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
         linkDelegationPolicy: WebView.DelegateAllLinks
@@ -117,15 +119,30 @@ Window {
         }
         onStatusChanged: if (status == WebView.Ready) screenshot.grab();
 
-        MouseArea {
-            width: 5
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: parent.right
-            }
-            onExited: if (mouseX <= 0) pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {});
+        PanningArea {
+            id: panningArea
+
+            anchors.fill: parent
         }
+
+        ZoomArea {
+            anchors {
+                fill: parent
+                margins: 10
+            }
+            enabled: !panningArea.pointerOn
+            onZoomIn: webView.zoomFactor += 0.1
+            onZoomOut: webView.zoomFactor -= 0.1
+            onZoomAt: webView.zoomFactor = ((webView.zoomFactor < 1.0) || (webView.zoomFactor >= 2.0) ? 1.0 : Math.min(webView.zoomFactor + 1.0, 2.0))
+        }
+    }
+
+    PanningIndicator {
+        id: panningIndicator
+
+        visible: panningArea.pointerOn
+        panningOn: panningArea.panningOn
+        onClicked: panningArea.panningOn = !panningArea.panningOn
     }
 
     ToolBar {
@@ -241,16 +258,8 @@ Window {
         }
     }
 
-    ToolButton {
-        width: 70
-        height: 70
-        anchors {
-            right: parent.right
-            bottom: parent.bottom
-        }
-        icon: "general_fullsize"
-        styleSheet: "background-color: transparent"
-        visible: !toolBar.visible
+    FullscreenIndicator {
+        visible: (!toolBar.visible) && ((webView.moving) || (webView.status != WebView.Ready))
         onClicked: window.fullScreen = false
     }
 
