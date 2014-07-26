@@ -7,10 +7,13 @@
         <file>ConfirmDeleteDialog.qml</file>
         <file>EditBookmarkDialog.qml</file>
 	<file>FullHistoryPage.qml</file>
+	<file>FullscreenIndicator.qml</file>
 	<file>HistoryView.qml</file>
         <file>NewBookmarkDialog.qml</file>
 	<file>NewSearchEngineDialog.qml</file>
 	<file>NewUrlHandlerDialog.qml</file>
+	<file>PanningArea.qml</file>
+	<file>PanningIndicator.qml</file>
 	<file>RecentHistoryPage.qml</file>
 	<file>SearchEngineView.qml</file>
 	<file>SettingsDialog.qml</file>
