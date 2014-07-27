@@ -1,6 +1,7 @@
 qml-browser (0.4.0) unstable; urgency=low
 
   * Added support for zooming via swirl gesture and double-tap.
+  * Added 'find' toolbar.
   * Added panning mouse pointer.
   * Bug fixes.
 
