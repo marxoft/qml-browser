@@ -49,6 +49,12 @@ Window {
         },
 
         Action {
+            text: qsTr("Copy")
+            enabled: webView.selectedText != ""
+            onTriggered: webView.copy()
+        },
+
+        Action {
             text: qsTr("Find on page")
             enabled: webView.status == WebView.Ready
             onTriggered: findToolBar.visible = true
