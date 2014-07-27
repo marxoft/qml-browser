@@ -50,14 +50,14 @@ Window {
 
         Action {
             text: qsTr("Copy")
-            enabled: (urlInput.selectedText) || (webView.selectedText)
-            onTriggered: urlInput.selectedText ? urlInput.copy() : webView.copy()
+            enabled: (urlInput.hasSelectedText) || (webView.hasSelection)
+            onTriggered: urlInput.hasSelectedText ? urlInput.copy() : webView.copy()
         },
 
         Action {
             text: qsTr("Paste")
-            enabled: clipboard.text != ""
-            onTriggered: urlInput.focus ? urlInput.paste() : webView.paste()
+            enabled: clipboard.hasText
+            onTriggered: internal.menuFocusItem.paste()
         },
 
         Action {
@@ -109,6 +109,12 @@ Window {
         }
     ]
 
+    QtObject {
+        id: internal
+
+        property variant menuFocusItem: urlInput
+    }
+
     WebView {
         id: webView
 
@@ -130,6 +136,7 @@ Window {
             viewLoader.source = "";
         }
         onStatusChanged: if (status == WebView.Ready) screenshot.grab();
+        onFocusChanged: if (focus) internal.menuFocusItem = webView;
 
         PanningArea {
             id: panningArea
@@ -142,7 +149,7 @@ Window {
                 fill: parent
                 margins: 10
             }
-            enabled: !panningArea.pointerOn
+            visible: !panningArea.pointerOn
             onZoomIn: webView.zoomFactor += 0.1
             onZoomOut: webView.zoomFactor -= 0.1
             onZoomAt: webView.zoomFactor = ((webView.zoomFactor < 1.0) || (webView.zoomFactor >= 2.0) ? 1.0 : Math.min(webView.zoomFactor + 1.0, 2.0))
@@ -243,7 +250,14 @@ Window {
                     viewLoader.source = "";
                 }
             }
-            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.source = "";
+            onFocusChanged: {
+                if (focus) {
+                    internal.menuFocusItem = urlInput;
+                }
+                else if ((viewLoader.item) && (!viewLoader.item.focus)) {
+                    viewLoader.source = "";
+                }
+            }
             onReturnPressed: webView.url = urlFromTextInput(text)
 
             Timer {
