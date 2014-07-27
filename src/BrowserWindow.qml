@@ -44,7 +44,7 @@ Window {
 
         Action {
             text: qsTr("Reload")
-            enabled: webView.status == WebView.Ready
+            enabled: (webView.status == WebView.Ready) || (webView.status == WebView.Error)
             onTriggered: webView.reload()
         },
 
@@ -83,7 +83,7 @@ Window {
 
         Action {
             shortcut: "Ctrl+R"
-            enabled: webView.status == WebView.Ready
+            enabled: (webView.status == WebView.Ready) || (webView.status == WebView.Error)
             onTriggered: webView.reload()
         },
 
