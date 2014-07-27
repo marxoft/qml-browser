@@ -50,8 +50,8 @@ Window {
 
         Action {
             text: qsTr("Copy")
-            enabled: webView.selectedText != ""
-            onTriggered: webView.copy()
+            enabled: (urlInput.selectedText) || (webView.selectedText)
+            onTriggered: urlInput.selectedText ? urlInput.copy() : webView.copy()
         },
 
         Action {
