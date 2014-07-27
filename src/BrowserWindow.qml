@@ -55,6 +55,12 @@ Window {
         },
 
         Action {
+            text: qsTr("Paste")
+            enabled: clipboard.text != ""
+            onTriggered: urlInput.focus ? urlInput.paste() : webView.paste()
+        },
+
+        Action {
             text: qsTr("Find on page")
             enabled: webView.status == WebView.Ready
             onTriggered: findToolBar.visible = true
