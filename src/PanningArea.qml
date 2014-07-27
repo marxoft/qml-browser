@@ -63,21 +63,25 @@ MouseArea {
     }
 
     onPressed: {
-        internal.enteredFromLeft = (mouseX < 5);
-        internal.enteredFromRight = (mouseX > (width - 5));
+        if (!pointerOn) {
+            internal.enteredFromLeft = (mouseX < 10);
+            internal.enteredFromRight = (mouseX > (width - 10));
+        }
     }
 
     onPositionChanged: {
-        if (internal.enteredFromLeft) {
-            if (mouseX > 10) {
-                pointerOn = true;
-                internal.enteredFromLeft = false;
+        if (!pointerOn) {
+            if (internal.enteredFromLeft) {
+                if (mouseX > 10) {
+                    pointerOn = true;
+                    internal.enteredFromLeft = false;
+                }
             }
-        }
-        else if (internal.enteredFromRight) {
-            if (mouseX < (width - 10)) {
-                pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {})
-                internal.enteredFromRight = false;
+            else if (internal.enteredFromRight) {
+                if (mouseX < (width - 10)) {
+                    pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {})
+                    internal.enteredFromRight = false;
+                }
             }
         }
     }
