@@ -37,6 +37,8 @@ Dialog {
 
         TextField {
             id: nameInput
+
+            focus: true
         }
 
         Label {
@@ -73,10 +75,12 @@ Dialog {
         nameInput.clear();
         regexpInput.clear();
         commandInput.clear();
+        nameInput.focus = true;
     }
     onRejected: {
         nameInput.clear();
         regexpInput.clear();
         commandInput.clear();
+        nameInput.focus = true;
     }
 }
