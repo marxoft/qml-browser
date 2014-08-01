@@ -21,6 +21,8 @@
 #include <QObject>
 #include <QDir>
 
+static const QString DIRECTORY("/home/user/.config/QMLBrowser/.cache/");
+
 class Cache : public QObject
 {
     Q_OBJECT
@@ -33,11 +35,11 @@ public:
 
 public slots:
     inline bool create() {
-        return QDir().mkpath("/home/user/.config/QMLBrowser/.cache/");
+        return QDir().mkpath(DIRECTORY);
     }
 
     inline void clear() {
-        QDir dir("/home/user/.config/QMLBrowser/.cache/");
+        QDir dir(DIRECTORY);
 
         foreach (QString fileName, dir.entryList(QStringList("*.jpg"), QDir::Files)) {
             dir.remove(dir.absoluteFilePath(fileName));
