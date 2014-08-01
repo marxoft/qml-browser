@@ -17,9 +17,11 @@
 
 #include "bookmarksmodel.h"
 #include "cache.h"
+#include "downloadmodel.h"
 #include "launcher.h"
 #include "searchenginemodel.h"
 #include "settings.h"
+#include "utils.h"
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -34,7 +36,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     app.setApplicationName("QML Browser");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
+    qmlRegisterUncreatableType<Download>("org.hildon.browser", 1, 0, "Download", "");
+    qmlRegisterUncreatableType<DownloadModel>("org.hildon.browser", 1, 0, "DownloadModel", "");
     qmlRegisterUncreatableType<SearchEngineModel>("org.hildon.browser", 1, 0, "SearchEngineModel", "");
+
+    Settings settings;
+    Utils utils;
 
     Cache cache;
     cache.create();
@@ -42,21 +49,22 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     Launcher launcher;
     launcher.loadHandlers();
 
-    Settings settings;
-
     BookmarksModel bookmarks;
-    bookmarks.setFileName("/home/user/.config/QMLBrowser/bookmarks.xml");
     bookmarks.load();
 
+    DownloadModel downloads;
+    downloads.load();
+
     SearchEngineModel searchEngines;
-    searchEngines.setFileName("/home/user/.config/QMLBrowser/searchengines.conf");
     searchEngines.load();
 
     QDeclarativeEngine engine;
     engine.rootContext()->setContextProperty("launcher", &launcher);
     engine.rootContext()->setContextProperty("bookmarks", &bookmarks);
+    engine.rootContext()->setContextProperty("downloads", &downloads);
     engine.rootContext()->setContextProperty("searchEngines", &searchEngines);
     engine.rootContext()->setContextProperty("qmlBrowserSettings", &settings);
+    engine.rootContext()->setContextProperty("qmlBrowserUtils", &utils);
 
     QDeclarativeComponent component(&engine, QUrl("qrc:/main.qml"));
     component.create();
@@ -70,6 +78,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     }
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &downloads, SLOT(save()));
 
     return app.exec();
 }
