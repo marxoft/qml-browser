@@ -64,9 +64,12 @@ Dialog {
         onClicked: root.accept()
     }
 
+    onRejected: nameInput.focus = true
     onAccepted: {
         if ((!bookmarks.setData(view.currentIndex, name, BookmarksModel.TitleRole)) || (!bookmarks.setData(view.currentIndex, address, BookmarksModel.UrlRole))) {
             infobox.showMessage(qsTr("Cannot edit bookmark"));
         }
+
+        nameInput.focus = true;
     }    
 }
