@@ -20,7 +20,7 @@ import org.hildon.components 1.0
 Dialog {
     id: root
 
-    height: window.inPortrait ? 260 : 160
+    height: window.inPortrait ? 300 : 200
     windowTitle: qsTr("About")
     content: Row {
         anchors.fill: parent
@@ -33,7 +33,11 @@ Dialog {
 
         Label {
             wordWrap: true
-            text: "<b><font size='4'>QML Browser 0.4.0</font></b><br><br>" + qsTr("A simple web browser written using Qt Components Hildon.")
+            text: "<b><font size='4'>QML Browser "
+                  + qmlBrowserUtils.versionNumber
+                  + "</font></b><br><br>"
+                  + qsTr("A simple web browser written using")
+                  + " Qt Components Hildon.<br><br>&copy; Stuart Howarth 2014"
         }
     }
 
