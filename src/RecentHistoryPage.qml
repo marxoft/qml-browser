@@ -50,7 +50,7 @@ Page {
             flow: ListView.LeftToRight
             verticalScrollMode: ListView.ScrollPerItem
             verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-            model: window.viewHistory.items
+            model: window.history.items
             delegate: ListItem {
                 width: 480
                 height: view.height
@@ -77,7 +77,7 @@ Page {
                             width: 5
                             color: platformStyle.selectionColor
                         }
-                        visible: window.viewHistory.currentIndex === row
+                        visible: window.history.currentIndex === row
                     }
                 }
 
@@ -95,8 +95,8 @@ Page {
             onClicked: {
                 var i = QModelIndex.row(view.currentIndex);
 
-                if (i !== window.viewHistory.currentIndex) {
-                    window.viewHistory.currentIndex = i;
+                if (i !== window.history.currentIndex) {
+                    window.history.currentIndex = i;
                 }
 
                 pageStack.pop(window);
@@ -116,6 +116,6 @@ Page {
         }
         color: platformStyle.secondaryTextColor
         text: qsTr("No recent history")
-        visible: window.viewHistory.count === 0
+        visible: window.history.count === 0
     }
 }
