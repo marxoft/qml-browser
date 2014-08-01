@@ -1,3 +1,16 @@
+qml-browser (0.5.0) unstable; urgency=low
+
+  * Browsing history is now persistant, and can be cleared in the settings.
+  * Added download manager.
+  * Added 'View source' option.
+  * Added 'Open file' option.
+  * Added 'Save link as' option.
+  * Added use of custom URL handlers via the context menu.
+  * Added some further settings in the settings dialog.
+  * Fixed permissions error in postinst script.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Fri, 01 Aug 2014 01:25:17 +0000
+
 qml-browser (0.4.0) unstable; urgency=low
 
   * Added support for zooming via swirl gesture and double-tap.
