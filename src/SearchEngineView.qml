@@ -32,7 +32,7 @@ ListView {
     }
     focus: true
     height: Math.min(searchEngines.count * 70, 280)
-    styleSheet: "background-color: " + platformStyle.defaultBackgroundColor + "; border: 1px solid " + platformStyle.disabledTextColor + ";"
+    autoFillBackground: true
     model: searchEngines
     horizontalScrollMode: ListView.ScrollPerItem
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
