@@ -30,8 +30,8 @@ ListView {
     }
     focus: true
     height: Math.min(webHistory.count * 70, 280)
-    styleSheet: "background-color: " + platformStyle.defaultBackgroundColor + "; border: 1px solid " + platformStyle.disabledTextColor + ";"
-    model: webHistory.urls.reverse()
+    autoFillBackground: true
+    model: webHistory.urls
     horizontalScrollMode: ListView.ScrollPerItem
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
     delegate: ListItem {
@@ -59,10 +59,10 @@ ListView {
     onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.source = "";
     onClicked: {
         if (window.url) {
-            window.url = view.model[QModelIndex.row(view.currentIndex)];
+            window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
         }
         else {
-            window.loadBrowserWindow(view.model[QModelIndex.row(view.currentIndex)]);
+            window.loadBrowserWindow(webHistory.urls[QModelIndex.row(view.currentIndex)]);
             urlInput.clear();
         }
     }
