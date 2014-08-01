@@ -4,13 +4,15 @@ set -e
 
 if [ ! -e /home/user/.config/QMLBrowser/searchengines.conf ]
     then
-        su -c 'echo "[DuckDuckGo]
+        echo "[DuckDuckGo]
 icon=duckduckgo.png
 url=https://duckduckgo.com/?q=%QUERY%
 
 [Wikipedia]
 icon=wikipedia.png
-url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines.conf' - user
+url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines.conf
+
+chown -hR user:users /home/user/.config/QMLBrowser/
 
 fi
 
