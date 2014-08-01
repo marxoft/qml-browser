@@ -20,6 +20,8 @@
 #include <QProcess>
 #include <QDebug>
 
+static const QString FILE_NAME("/home/user/.config/QMLBrowser/urlhandlers.conf");
+
 Launcher::Launcher(QObject *parent) :
     QObject(parent)
 {
@@ -29,7 +31,7 @@ Launcher::~Launcher() {}
 
 void Launcher::loadHandlers() {
     m_handlers.clear();
-    QSettings settings("/home/user/.config/QMLBrowser/urlhandlers.conf", QSettings::NativeFormat);
+    QSettings settings(FILE_NAME, QSettings::NativeFormat);
 
     foreach (QString group, settings.childGroups()) {
         settings.beginGroup(group);
@@ -62,7 +64,7 @@ bool Launcher::addHandler(const QString &name, const QString &regExp, const QStr
         handler.command = command;
         m_handlers.append(handler);
 
-        QSettings settings("/home/user/.config/QMLBrowser/urlhandlers.conf", QSettings::NativeFormat);
+        QSettings settings(FILE_NAME, QSettings::NativeFormat);
         settings.beginGroup(name);
         settings.setValue("regExp", regExp);
         settings.setValue("command", command);
