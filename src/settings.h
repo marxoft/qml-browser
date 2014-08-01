@@ -24,28 +24,62 @@ class Settings : public QSettings
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool useCustomURLHandlers
-               READ useCustomURLHandlers
-               WRITE setUseCustomURLHandlers
-               NOTIFY useCustomURLHandlersChanged)
-    Q_PROPERTY(bool javaScriptEnabled
-               READ javaScriptEnabled
-               WRITE setJavaScriptEnabled
-               NOTIFY javaScriptEnabledChanged)
+    Q_PROPERTY(bool forceToolBarVisibleWhenLoading READ forceToolBarVisibleWhenLoading WRITE setForceToolBarVisibleWhenLoading NOTIFY forceToolBarVisibleWhenLoadingChanged)
+    Q_PROPERTY(bool openBrowserWindowsInFullScreen READ openBrowserWindowsInFullScreen WRITE setOpenBrowserWindowsInFullScreen NOTIFY openBrowserWindowsInFullScreenChanged)
+    Q_PROPERTY(bool rotationEnabled READ rotationEnabled WRITE setRotationEnabled NOTIFY rotationEnabledChanged)
+    Q_PROPERTY(bool zoomWithVolumeKeys READ zoomWithVolumeKeys WRITE setZoomWithVolumeKeys NOTIFY zoomWithVolumeKeysChanged)
+    Q_PROPERTY(bool useCustomURLHandlers READ useCustomURLHandlers WRITE setUseCustomURLHandlers NOTIFY useCustomURLHandlersChanged)
+    Q_PROPERTY(bool privateBrowsingEnabled READ privateBrowsingEnabled WRITE setPrivateBrowsingEnabled NOTIFY privateBrowsingEnabledChanged)
+    Q_PROPERTY(bool autoLoadImages READ autoLoadImages WRITE setAutoLoadImages NOTIFY autoLoadImagesChanged)
+    Q_PROPERTY(bool javaScriptEnabled READ javaScriptEnabled WRITE setJavaScriptEnabled NOTIFY javaScriptEnabledChanged)
+    Q_PROPERTY(int defaultFontSize READ defaultFontSize WRITE setDefaultFontSize NOTIFY defaultFontSizeChanged)
+    Q_PROPERTY(QString defaultTextEncoding READ defaultTextEncoding WRITE setDefaultTextEncoding NOTIFY defaultTextEncodingChanged)
 
 public:
     explicit Settings(QObject *parent = 0);
     ~Settings();
 
+    bool forceToolBarVisibleWhenLoading() const;
+    void setForceToolBarVisibleWhenLoading(bool force);
+
+    bool openBrowserWindowsInFullScreen() const;
+    void setOpenBrowserWindowsInFullScreen(bool fullScreen);
+
+    bool rotationEnabled() const;
+    void setRotationEnabled(bool enabled);
+
+    bool zoomWithVolumeKeys() const;
+    void setZoomWithVolumeKeys(bool zoom);
+
     bool useCustomURLHandlers() const;
     void setUseCustomURLHandlers(bool use);
+
+    bool privateBrowsingEnabled() const;
+    void setPrivateBrowsingEnabled(bool enabled);
+
+    bool autoLoadImages() const;
+    void setAutoLoadImages(bool load);
 
     bool javaScriptEnabled() const;
     void setJavaScriptEnabled(bool enabled);
 
+    int defaultFontSize() const;
+    void setDefaultFontSize(int size);
+
+    QString defaultTextEncoding() const;
+    void setDefaultTextEncoding(const QString &encoding);
+
 signals:
+    void forceToolBarVisibleWhenLoadingChanged();
+    void openBrowserWindowsInFullScreenChanged();
+    void rotationEnabledChanged();
+    void zoomWithVolumeKeysChanged();
     void useCustomURLHandlersChanged();
+    void privateBrowsingEnabledChanged();
+    void autoLoadImagesChanged();
     void javaScriptEnabledChanged();
+    void defaultFontSizeChanged();
+    void defaultTextEncodingChanged();
     
 private:
     Q_DISABLE_COPY(Settings)
