@@ -4,7 +4,8 @@
         <file>AboutDialog.qml</file>
         <file>BookmarksPage.qml</file>
 	<file>BrowserWindow.qml</file>
-        <file>ConfirmDeleteDialog.qml</file>
+        <file>ConfirmBookmarkDeleteDialog.qml</file>
+	<file>DownloadsDialog.qml</file>
         <file>EditBookmarkDialog.qml</file>
 	<file>FullHistoryPage.qml</file>
 	<file>FullscreenIndicator.qml</file>
@@ -12,12 +13,15 @@
         <file>NewBookmarkDialog.qml</file>
 	<file>NewSearchEngineDialog.qml</file>
 	<file>NewUrlHandlerDialog.qml</file>
+	<file>OpenFileDialog.qml</file>
 	<file>PanningArea.qml</file>
 	<file>PanningIndicator.qml</file>
 	<file>RecentHistoryPage.qml</file>
+	<file>SaveFileDialog.qml</file>
 	<file>SearchEngineView.qml</file>
 	<file>SettingsDialog.qml</file>
 	<file>UrlInputField.qml</file>
+	<file>ViewSourcePage.qml</file>
 	<file>CreateObject.js</file>
     </qresource>
 </RCC>
