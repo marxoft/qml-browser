@@ -24,7 +24,8 @@ Window {
     id: window
 
     function loadBrowserWindow(url) {
-        var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"), null);
+        var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"));
+        browser.fullScreen = qmlBrowserSettings.openBrowserWindowsInFullScreen;
 
         if (url) {
             browser.url = url;
@@ -33,6 +34,22 @@ Window {
 
     windowTitle: "QML Browser"
     tools: [
+        Action {
+            text: qsTr("Open file")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("OpenFileDialog.qml");
+                loader.item.open();
+            }
+        },
+
+        Action {
+            text: qsTr("Downloads")
+            onTriggered: {
+                loader.source = Qt.resolvedUrl("DownloadsDialog.qml");
+                loader.item.open();
+            }
+        },
+
         Action {
             text: qsTr("Settings")
             onTriggered: {
@@ -49,6 +66,14 @@ Window {
             }
         }
     ]
+
+    actions: Action {
+        shortcut: "Ctrl+O"
+        onTriggered: {
+            loader.source = Qt.resolvedUrl("OpenFileDialog.qml");
+            loader.item.open();
+        }
+    }
 
     ListView {
         id: view
@@ -77,7 +102,7 @@ Window {
             Action {
                 text: qsTr("Delete")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("ConfirmDeleteDialog.qml");
+                    loader.source = Qt.resolvedUrl("ConfirmBookmarkDeleteDialog.qml");
                     loader.item.open();
                 }
             }
@@ -157,5 +182,18 @@ Window {
 
     Loader {
         id: loader
+    }
+
+    onVisibleChanged: {
+        // Temporary solution until the attached Component property is exposed
+        if (visible) {
+            if (webHistory.count == 0) {
+                webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
+                webHistory.load();
+            }
+        }
+        else {
+            webHistory.save();
+        }
     }
 }
