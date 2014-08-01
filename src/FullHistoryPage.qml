@@ -27,7 +27,7 @@ Page {
         id: view
 
         anchors.fill: parent
-        model: webHistory.urls.reverse()
+        model: webHistory.urls
         delegate: ListItem {
             width: view.width
             height: 70
@@ -51,7 +51,7 @@ Page {
             }
         }
         onClicked: {
-            window.url = view.model[QModelIndex.row(view.currentIndex)];
+            window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
             pageStack.pop(window);
         }
     }
