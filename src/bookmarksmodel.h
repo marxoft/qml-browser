@@ -26,13 +26,7 @@ class BookmarksModel : public QAbstractListModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(int count
-               READ rowCount
-               NOTIFY countChanged)
-    Q_PROPERTY(QString fileName
-               READ fileName
-               WRITE setFileName
-               NOTIFY fileNameChanged)
+    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
     Q_ENUMS(Roles)
 
@@ -45,9 +39,6 @@ public:
 
     explicit BookmarksModel(QObject *parent = 0);
     ~BookmarksModel();
-
-    inline QString fileName() const { return m_fileName; }
-    void setFileName(const QString &fileName);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
@@ -65,10 +56,8 @@ public slots:
 
 signals:
     void countChanged();
-    void fileNameChanged();
     
 private:
-    QString m_fileName;
     QDomDocument m_document;
 
     Q_DISABLE_COPY(BookmarksModel)

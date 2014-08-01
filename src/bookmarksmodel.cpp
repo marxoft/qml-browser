@@ -22,6 +22,8 @@
 #include <QTextStream>
 #include <QIcon>
 
+static const QString FILE_NAME("/home/user/.config/QMLBrowser/bookmarks.xml");
+
 BookmarksModel::BookmarksModel(QObject *parent) :
     QAbstractListModel(parent)
 {
@@ -33,13 +35,6 @@ BookmarksModel::BookmarksModel(QObject *parent) :
 }
 
 BookmarksModel::~BookmarksModel() {}
-
-void BookmarksModel::setFileName(const QString &fileName) {
-    if (fileName != this->fileName()) {
-        m_fileName = fileName;
-        emit fileNameChanged();
-    }
-}
 
 int BookmarksModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent)
@@ -165,8 +160,8 @@ bool BookmarksModel::removeBookmark(int row) {
 }
 
 void BookmarksModel::load() {
-    QDir().mkpath(this->fileName().left(this->fileName().lastIndexOf('/')));
-    QFile file(this->fileName());
+    QDir().mkpath(FILE_NAME.left(FILE_NAME.lastIndexOf('/')));
+    QFile file(FILE_NAME);
 
     if ((file.exists()) && (file.open(QIODevice::ReadOnly)) && (m_document.setContent(&file)) && (this->rowCount() > 0)) {
         emit countChanged();
@@ -180,7 +175,7 @@ void BookmarksModel::load() {
 }
 
 bool BookmarksModel::save() {
-    QFile file(this->fileName());
+    QFile file(FILE_NAME);
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         const int IndentSize = 4;
