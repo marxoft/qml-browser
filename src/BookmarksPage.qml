@@ -45,7 +45,7 @@ Page {
             Action {
                 text: qsTr("Delete")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("ConfirmDeleteDialog.qml");
+                    loader.source = Qt.resolvedUrl("ConfirmBookmarkDeleteDialog.qml");
                     loader.item.open();
                 }
             }
