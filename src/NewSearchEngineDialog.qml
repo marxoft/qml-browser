@@ -37,6 +37,8 @@ Dialog {
 
         TextField {
             id: nameInput
+
+            focus: true
         }
 
         Label {
@@ -70,11 +72,13 @@ Dialog {
         nameInput.clear();
         addressInput.clear();
         iconSelector.iconPath = "";
+        nameInput.focus = true;
     }
     onRejected: {
         nameInput.clear();
         addressInput.clear();
         iconSelector.iconPath = "";
+        nameInput.focus = true;
     }
 
     FileDialog {
