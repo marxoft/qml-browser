@@ -7,7 +7,7 @@ Standards-Version: 3.7.3
 
 Package: qml-browser
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, qt-components-hildon (>= 0.6.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, qt-components-hildon (>= 0.7.0)
 Description: Simple web browser written using Qt Components Hildon
  QML Browser is a web browser with a user interface created using
  Qt Components Hildon. QML Browser is intended as an example of
