@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QIcon>
 
+static const QString FILE_NAME("/home/user/.config/QMLBrowser/searchengines.conf");
+
 SearchEngineModel::SearchEngineModel(QObject *parent) :
     QAbstractListModel(parent)
 {
@@ -31,13 +33,6 @@ SearchEngineModel::SearchEngineModel(QObject *parent) :
 }
 
 SearchEngineModel::~SearchEngineModel() {}
-
-void SearchEngineModel::setFileName(const QString &fileName) {
-    if (fileName != this->fileName()) {
-        m_fileName = fileName;
-        emit fileNameChanged();
-    }
-}
 
 int SearchEngineModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
@@ -83,7 +78,7 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
 
     emit dataChanged(index, index);
 
-    QSettings settings(this->fileName(), QSettings::NativeFormat);
+    QSettings settings(FILE_NAME, QSettings::NativeFormat);
     settings.beginGroup(m_list.at(index.row()).name);
     settings.setValue("icon", m_list.at(index.row()).icon);
     settings.setValue("url", m_list.at(index.row()).url);
@@ -91,7 +86,7 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
 }
 
 void SearchEngineModel::addSearchEngine(const QString &name, const QString &icon, const QString &url) {
-    QSettings settings(this->fileName(), QSettings::NativeFormat);
+    QSettings settings(FILE_NAME, QSettings::NativeFormat);
     settings.beginGroup(name);
     settings.setValue("icon", icon);
     settings.setValue("url", url);
@@ -115,15 +110,15 @@ void SearchEngineModel::removeSearchEngine(const QModelIndex &index) {
 void SearchEngineModel::removeSearchEngine(int row) {
     if ((row >= 0) && (row < m_list.size())) {
         this->beginRemoveRows(QModelIndex(), row, row);
-        QSettings(this->fileName(), QSettings::NativeFormat).remove(m_list.takeAt(row).name);
+        QSettings(FILE_NAME, QSettings::NativeFormat).remove(m_list.takeAt(row).name);
         this->endRemoveRows();
         emit countChanged();
     }
 }
 
 void SearchEngineModel::load() {
-    QSettings settings(this->fileName(), QSettings::NativeFormat);
-    QDir dir(this->fileName().left(this->fileName().lastIndexOf('/')));
+    QSettings settings(FILE_NAME, QSettings::NativeFormat);
+    QDir dir(FILE_NAME.left(FILE_NAME.lastIndexOf('/')));
 
     this->beginResetModel();
     m_list.clear();
