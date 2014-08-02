@@ -66,15 +66,43 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("qmlBrowserSettings", &settings);
     engine.rootContext()->setContextProperty("qmlBrowserUtils", &utils);
 
-    QDeclarativeComponent component(&engine, QUrl("qrc:/main.qml"));
-    component.create();
+    QString url;
+    bool fullScreen = false;
+    QStringList args = app.arguments();
+
+    if (args.size() > 1) {
+        args.removeFirst();
+
+        foreach (QString arg, args) {
+            arg = arg.toLower();
+
+            if (arg.startsWith("--url=")) {
+                url = arg.section("--url=", -1);
+            }
+            else if (arg.startsWith("--full_screen")) {
+                fullScreen = true;
+            }
+        }
+    }
+
+    QDeclarativeComponent component(&engine, QUrl(url.isEmpty() ? "qrc:/main.qml" : "qrc:/main_browser.qml"));
+    QObject *obj = component.create();
 
     if (component.isError()) {
         foreach (QDeclarativeError error, component.errors()) {
             qWarning() << error.toString();
         }
 
+        if (obj) {
+            delete obj;
+        }
+
         return 0;
+    }
+
+    if (!url.isEmpty()) {
+        obj->setProperty("url", url);
+        obj->setProperty("fullScreen", (fullScreen) || (settings.openBrowserWindowsInFullScreen()));
     }
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));
