@@ -17,7 +17,7 @@
 
 import org.hildon.components 1.0
 
-Rectangle {
+Item {
     id: root
 
     signal clicked
@@ -29,10 +29,14 @@ Rectangle {
         bottom: parent.bottom
         margins: -10
     }
-    color: "black"
-    opacity: 0.5
-    radius: 10
-    smooth: true
+
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.5
+        radius: 10
+        smooth: true
+    }
 
     Image {
         width: 64
