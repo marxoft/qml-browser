@@ -40,9 +40,4 @@ Dialog {
                   + " Qt Components Hildon.<br><br>&copy; Stuart Howarth 2014"
         }
     }
-
-    buttons: Button {
-        text: qsTr("Done")
-        onClicked: root.accept()
-    }
 }
