@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+	<file>main_browser.qml</file>
         <file>AboutDialog.qml</file>
         <file>BookmarksPage.qml</file>
 	<file>BrowserWindow.qml</file>
