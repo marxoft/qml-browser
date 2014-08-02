@@ -47,7 +47,7 @@ void Settings::setOpenBrowserWindowsInFullScreen(bool fullScreen) {
 }
 
 bool Settings::rotationEnabled() const {
-    return this->value("rotatonEnabled", false).toBool();
+    return this->value("rotationEnabled", false).toBool();
 }
 
 void Settings::setRotationEnabled(bool enabled) {
