@@ -391,7 +391,7 @@ Window {
     }
 
     FullscreenIndicator {
-        visible: (!toolBar.visible) && (!findToolBar.visible) && ((webView.moving) || (webView.status != WebView.Ready))
+        visible: (!toolBar.visible) && (!findToolBar.visible) && ((webView.moving) || (webView.atYEnd) || (webView.status != WebView.Ready))
         onClicked: window.fullScreen = !window.fullScreen
     }
 

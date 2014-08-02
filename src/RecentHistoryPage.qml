@@ -114,7 +114,7 @@ Page {
             bold: true
             pixelSize: 40
         }
-        color: platformStyle.secondaryTextColor
+        color: platformStyle.disabledTextColor
         text: qsTr("No recent history")
         visible: window.history.count === 0
     }

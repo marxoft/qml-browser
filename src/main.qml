@@ -121,7 +121,7 @@ Window {
             bold: true
             pixelSize: 40
         }
-        color: platformStyle.secondaryTextColor
+        color: platformStyle.disabledTextColor
         text: qsTr("No bookmarks")
         visible: bookmarks.count === 0
     }
