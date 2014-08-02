@@ -187,6 +187,8 @@ Window {
     onVisibleChanged: {
         // Temporary solution until the attached Component property is exposed
         if (visible) {
+            screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation : Screen.LandscapeOrientation);
+
             if (webHistory.count == 0) {
                 webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
                 webHistory.load();
