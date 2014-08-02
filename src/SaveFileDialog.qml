@@ -67,6 +67,6 @@ Dialog {
     FolderDialog {
         id: locationDialog
 
-        onSelected: root.location = folder
+        onSelected: root.location = (folder[folder.length - 1] == "/" ? folder : folder + "/")
     }
 }
