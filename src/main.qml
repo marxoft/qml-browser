@@ -172,7 +172,7 @@ Window {
 
             anchors.fill: parent
             alignment: Qt.AlignCenter
-            color: platformStyle.notificationTextColor
+            color: platformStyle.reversedTextColor
         }
     }
 
