@@ -1,3 +1,10 @@
+qml-browser (0.5.2) unstable; urgency=low
+
+  * Added 'forward' button to the toolbar (shortcut is CTRL+Backspace).
+  * Fixed access to data roles in the download model.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Sun, 03 Aug 2014 16:14:25 +0000
+
 qml-browser (0.5.1) unstable; urgency=low
 
   * Added support for command line arguments (supported arguments are --url=$URL and --full_screen to force fullscreen).
