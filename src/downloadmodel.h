@@ -29,6 +29,8 @@ class DownloadModel : public QAbstractTableModel
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
     Q_PROPERTY(int activeDownloads READ activeDownloads NOTIFY activeDownloadsChanged)
 
+    Q_ENUMS(Roles)
+
 public:
     enum Roles {
         FileNameRole = Qt::UserRole + 1,
