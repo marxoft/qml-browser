@@ -139,6 +139,12 @@ Window {
         Action {
             shortcut: "Ctrl+B"
             onTriggered: pageStack.push(Qt.resolvedUrl("BookmarksPage.qml"), {})
+        },
+
+        Action {
+            shortcut: "Shift+Backspace"
+            enabled: webView.focus
+            onTriggered: webView.forward()
         }
     ]
 
@@ -266,6 +272,7 @@ Window {
 
                 anchors.fill: parent
                 onPressed: webView.hitContent = webView.hitTestContent(mouseX, mouseY)
+                onReleased: webView.hitContent = undefined
             }
         }
     }
@@ -319,8 +326,15 @@ Window {
         movable: false
         visible: (!window.fullScreen) || ((webView.status == WebView.Loading) && (qmlBrowserSettings.forceToolBarVisibleWhenLoading))
 
+        Timer {
+            id: historyTimer
+
+            interval: 800
+            onTriggered: pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {})
+        }
+
         ToolButton {
-            icon: "browser_history"
+            icon: "general_back"
             onPressed: historyTimer.restart()
             onReleased: {
                 if (historyTimer.running) {
@@ -328,23 +342,18 @@ Window {
                 }
 
                 historyTimer.stop();
-            }
-
-            Timer {
-                id: historyTimer
-
-                interval: 800
-                onTriggered: pageStack.push(Qt.resolvedUrl("RecentHistoryPage.qml"), {})
-            }
+            }            
         }
 
-        Action {
-            icon: "general_add"
-            onTriggered: {
-                loader.source = Qt.resolvedUrl("NewBookmarkDialog.qml");
-                loader.item.name = webView.title;
-                loader.item.address = webView.url;
-                loader.item.open();
+        ToolButton {
+            icon: "general_forward"
+            onPressed: historyTimer.restart()
+            onReleased: {
+                if (historyTimer.running) {
+                    webView.forward();
+                }
+
+                historyTimer.stop();
             }
         }
 
