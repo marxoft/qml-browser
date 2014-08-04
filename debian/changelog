@@ -1,3 +1,9 @@
+qml-browser (0.5.3) unstable; urgency=low
+
+  * Ship QML files instead of using QRC.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Mon, 04 Aug 2014 02:36:41 +0000
+
 qml-browser (0.5.2) unstable; urgency=low
 
   * Added 'forward' button to the toolbar (shortcut is CTRL+Backspace).
