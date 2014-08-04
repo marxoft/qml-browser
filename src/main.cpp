@@ -85,7 +85,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
         }
     }
 
-    QDeclarativeComponent component(&engine, QUrl(url.isEmpty() ? "qrc:/main.qml" : "qrc:/main_browser.qml"));
+    QDeclarativeComponent component(&engine, QUrl::fromLocalFile(QString("/opt/qml-browser/qml/%1.qml").arg(url.isEmpty() ? "main" : "main_browser")));
     QObject *obj = component.create();
 
     if (component.isError()) {

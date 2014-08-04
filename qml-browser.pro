@@ -20,9 +20,10 @@ HEADERS += src/bookmarksmodel.h \
     src/settings.h \
     src/utils.h
 
-RESOURCES += src/resources.qrc
+target.path = /opt/qml-browser/bin
 
-OTHER_FILES += src/*.qml
+qml.files = $$files(src/qml/*.*)
+qml.path = /opt/qml-browser/qml
 
 desktopfile.files = qml-browser.desktop
 desktopfile.path = /usr/share/applications/hildon
@@ -30,6 +31,4 @@ desktopfile.path = /usr/share/applications/hildon
 searchengines.files = $$files(searchengines/*.*)
 searchengines.path = /home/user/.config/QMLBrowser
 
-target.path = /opt/qml-browser/bin
-
-INSTALLS += target desktopfile searchengines
+INSTALLS += target qml desktopfile searchengines
