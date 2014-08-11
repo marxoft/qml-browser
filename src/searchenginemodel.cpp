@@ -65,7 +65,6 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
     }
 
     switch (role) {
-    case Qt::DisplayRole:
     case IconRole:
         m_list[index.row()].icon = value.toString();
         break;
