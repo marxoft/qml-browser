@@ -49,6 +49,13 @@ Dialog {
             }
 
             CheckBox {
+                id: volumeKeysCheckbox
+
+                text: qsTr("Use volume keys to zoom")
+                checked: qmlBrowserSettings.zoomWithVolumeKeys
+            }
+
+            CheckBox {
                 id: fullScreenCheckbox
 
                 text: qsTr("Open browser windows in fullscreen")
@@ -109,6 +116,13 @@ Dialog {
 
                 text: qsTr("Enable JavaScript")
                 checked: qmlBrowserSettings.javaScriptEnabled
+            }
+
+            CheckBox {
+                id: zoomTextCheckbox
+
+                text: qsTr("Apply zoom to text only")
+                checked: qmlBrowserSettings.zoomTextOnly
             }
 
             ValueButton {
@@ -181,6 +195,16 @@ Dialog {
                     currentIndex: indexOf(qmlBrowserSettings.defaultTextEncoding)
                 }
             }
+
+            Label {
+                text: qsTr("User-Agent string")
+            }
+
+            TextField {
+                id: userAgentInput
+
+                text: qmlBrowserSettings.userAgentString
+            }
         }
     }
 
@@ -191,26 +215,44 @@ Dialog {
 
     onAccepted: {
         screen.orientationLock = (rotationCheckbox.checked ? Screen.AutoOrientation : Screen.LandscapeOrientation);
+
+        if (volumeKeysCheckbox.checked != qmlBrowserSettings.zoomWithVolumeKeys) {
+            if (window) {
+                if (volumeKeysCheckbox.checked) {
+                    volumeKeys.grab(window);
+                }
+                else {
+                    volumeKeys.release(window);
+                }
+            }
+        }
+
         qmlBrowserSettings.rotationEnabled = rotationCheckbox.checked;
+        qmlBrowserSettings.zoomWithVolumeKeys = volumeKeysCheckbox.checked;
         qmlBrowserSettings.openBrowserWindowsInFullScreen = fullScreenCheckbox.checked;
         qmlBrowserSettings.forceToolBarVisibleWhenLoading = forceToolbarCheckbox.checked;
         qmlBrowserSettings.useCustomURLHandlers = handlersCheckbox.checked;
         qmlBrowserSettings.privateBrowsingEnabled = privateCheckbox.checked;
         qmlBrowserSettings.autoLoadImages = imagesCheckbox.checked;
         qmlBrowserSettings.javaScriptEnabled = jsCheckbox.checked;
+        qmlBrowserSettings.zoomTextOnly = zoomTextCheckbox.checked;
         qmlBrowserSettings.defaultFontSize = fontSelector.sizes[fontSelector.currentIndex].value;
         qmlBrowserSettings.defaultTextEncoding = encodingSelector.encodings[encodingSelector.currentIndex].value;
+        qmlBrowserSettings.userAgentString = userAgentInput.text;
     }
     onRejected: {
         rotationCheckbox.checked = qmlBrowserSettings.rotationEnabled;
+        volumeKeysCheckbox.checked = qmlBrowserSettings.zoomWithVolumeKeys;
         fullScreenCheckbox.checked = qmlBrowserSettings.openBrowserWindowsInFullScreen;
         forceToolbarCheckbox.checked = qmlBrowserSettings.forceToolBarVisibleWhenLoading;
         handlersCheckbox.checked = qmlBrowserSettings.useCustomURLHandlers;
         privateCheckbox.checked = qmlBrowserSettings.privateBrowsingEnabled;
         imagesCheckbox.checked = qmlBrowserSettings.autoLoadImages;
         jsCheckbox.checked = qmlBrowserSettings.javaScriptEnabled;
+        zoomTextCheckbox.checked = qmlBrowserSettings.zoomTextOnly;
         fontSelector.currentIndex = fontSelector.indexOf(qmlBrowserSettings.defaultFontSize);
         encodingSelector.currentIndex = encodingSelector.indexOf(qmlBrowserSettings.defaultTextEncoding);
+        userAgentInput.text = qmlBrowserSettings.userAgentString;
     }
 
     Loader {

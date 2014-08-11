@@ -112,6 +112,17 @@ void Settings::setJavaScriptEnabled(bool enabled) {
     }
 }
 
+bool Settings::zoomTextOnly() const {
+    return this->value("Content/zoomTextOnly", false).toBool();
+}
+
+void Settings::setZoomTextOnly(bool textOnly) {
+    if (textOnly != this->zoomTextOnly()) {
+        this->setValue("Content/zoomTextOnly", textOnly);
+        emit zoomTextOnlyChanged();
+    }
+}
+
 int Settings::defaultFontSize() const {
     return this->value("Content/defaultFontSize", 16).toInt();
 }
@@ -131,5 +142,16 @@ void Settings::setDefaultTextEncoding(const QString &encoding) {
     if (encoding != this->defaultTextEncoding()) {
         this->setValue("Content/defaultTextEncoding", encoding);
         emit defaultTextEncodingChanged();
+    }
+}
+
+QString Settings::userAgentString() const {
+    return this->value("Content/userAgentString").toString();
+}
+
+void Settings::setUserAgentString(const QString &agent) {
+    if (agent != this->userAgentString()) {
+        this->setValue("Content/userAgentString", agent);
+        emit userAgentStringChanged();
     }
 }

@@ -32,8 +32,10 @@ class Settings : public QSettings
     Q_PROPERTY(bool privateBrowsingEnabled READ privateBrowsingEnabled WRITE setPrivateBrowsingEnabled NOTIFY privateBrowsingEnabledChanged)
     Q_PROPERTY(bool autoLoadImages READ autoLoadImages WRITE setAutoLoadImages NOTIFY autoLoadImagesChanged)
     Q_PROPERTY(bool javaScriptEnabled READ javaScriptEnabled WRITE setJavaScriptEnabled NOTIFY javaScriptEnabledChanged)
+    Q_PROPERTY(bool zoomTextOnly READ zoomTextOnly WRITE setZoomTextOnly NOTIFY zoomTextOnlyChanged)
     Q_PROPERTY(int defaultFontSize READ defaultFontSize WRITE setDefaultFontSize NOTIFY defaultFontSizeChanged)
     Q_PROPERTY(QString defaultTextEncoding READ defaultTextEncoding WRITE setDefaultTextEncoding NOTIFY defaultTextEncodingChanged)
+    Q_PROPERTY(QString userAgentString READ userAgentString WRITE setUserAgentString NOTIFY userAgentStringChanged)
 
 public:
     explicit Settings(QObject *parent = 0);
@@ -63,11 +65,17 @@ public:
     bool javaScriptEnabled() const;
     void setJavaScriptEnabled(bool enabled);
 
+    bool zoomTextOnly() const;
+    void setZoomTextOnly(bool textOnly);
+
     int defaultFontSize() const;
     void setDefaultFontSize(int size);
 
     QString defaultTextEncoding() const;
     void setDefaultTextEncoding(const QString &encoding);
+
+    QString userAgentString() const;
+    void setUserAgentString(const QString &agent);
 
 signals:
     void forceToolBarVisibleWhenLoadingChanged();
@@ -78,8 +86,10 @@ signals:
     void privateBrowsingEnabledChanged();
     void autoLoadImagesChanged();
     void javaScriptEnabledChanged();
+    void zoomTextOnlyChanged();
     void defaultFontSizeChanged();
     void defaultTextEncodingChanged();
+    void userAgentStringChanged();
     
 private:
     Q_DISABLE_COPY(Settings)
