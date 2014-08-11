@@ -22,6 +22,7 @@
 #include "searchenginemodel.h"
 #include "settings.h"
 #include "utils.h"
+#include "volumekeys.h"
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -42,6 +43,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     Settings settings;
     Utils utils;
+    VolumeKeys keys;
 
     Cache cache;
     cache.create();
@@ -65,6 +67,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("searchEngines", &searchEngines);
     engine.rootContext()->setContextProperty("qmlBrowserSettings", &settings);
     engine.rootContext()->setContextProperty("qmlBrowserUtils", &utils);
+    engine.rootContext()->setContextProperty("volumeKeys", &keys);
 
     QString url;
     bool fullScreen = false;
