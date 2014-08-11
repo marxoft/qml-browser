@@ -9,7 +9,8 @@ SOURCES += src/main.cpp \
     src/launcher.cpp \
     src/searchenginemodel.cpp \
     src/settings.cpp \
-    src/utils.cpp
+    src/utils.cpp \
+    src/volumekeys.cpp
 
 HEADERS += src/bookmarksmodel.h \
     src/cache.h \
@@ -18,7 +19,8 @@ HEADERS += src/bookmarksmodel.h \
     src/launcher.h \
     src/searchenginemodel.h \
     src/settings.h \
-    src/utils.h
+    src/utils.h \
+    src/volumekeys.h
 
 target.path = /opt/qml-browser/bin
 
