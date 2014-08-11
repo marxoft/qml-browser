@@ -82,6 +82,8 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
     settings.setValue("icon", m_list.at(index.row()).icon);
     settings.setValue("url", m_list.at(index.row()).url);
     settings.endGroup();
+
+    return true;
 }
 
 void SearchEngineModel::addSearchEngine(const QString &name, const QString &icon, const QString &url) {
