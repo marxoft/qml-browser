@@ -168,11 +168,13 @@ Window {
         contextMenuPolicy: panningArea.panningOn ? Qt.NoContextMenu : Qt.ActionsContextMenu
         interactive: !panningArea.pointerOn
         textSelectionEnabled: panningArea.panningOn
+        userAgent: qmlBrowserSettings.userAgentString
         settings {
             pluginsEnabled: true
             privateBrowsingEnabled: qmlBrowserSettings.privateBrowsingEnabled
             autoLoadImages: qmlBrowserSettings.autoLoadImages
             javascriptEnabled: qmlBrowserSettings.javaScriptEnabled
+            zoomTextOnly: qmlBrowserSettings.zoomTextOnly
             defaultFontSize: qmlBrowserSettings.defaultFontSize
             defaultTextEncoding: qmlBrowserSettings.defaultTextEncoding
         }
@@ -251,6 +253,57 @@ Window {
             }
         ]
 
+        Keys.onPressed: {
+            switch (event.key) {
+            case Qt.Key_Up:
+                if (event.modifiers & Qt.ShiftModifier) {
+                    webView.contentY = 0;
+                }
+                else {
+                    webView.contentY = Math.max(0, webView.contentY - 20);
+                }
+
+                break;
+            case Qt.Key_Down:
+                if (event.modifiers & Qt.ShiftModifier) {
+                    webView.contentY = 100000000;
+                }
+                else {
+                    webView.contentY += 20;
+                }
+
+                break;
+            case Qt.Key_Left:
+                if (event.modifiers & Qt.ShiftModifier) {
+                    webView.contentX = 0;
+                }
+                else {
+                    webView.contentX = Math.max(0, webView.contentX - 20);
+                }
+
+                break;
+            case Qt.Key_Right:
+                if (event.modifiers & Qt.ShiftModifier) {
+                    webView.contentX = 100000000;
+                }
+                else {
+                    webView.contentX += 20;
+                }
+
+                break;
+            case Qt.Key_F8:
+                webView.zoomFactor -= 0.1;
+                break;
+            case Qt.Key_F7:
+                webView.zoomFactor += 0.1;
+                break;
+            default:
+                return;
+            }
+
+            event.accepted = true;
+        }
+
         PanningArea {
             id: panningArea
 
@@ -295,6 +348,7 @@ Window {
         }
         movable: false
         visible: false
+        onVisibleChanged: if (visible) findInput.focus = true;
 
         Label {
             alignment: Qt.AlignLeft | Qt.AlignVCenter
@@ -302,6 +356,8 @@ Window {
         }
 
         TextField {
+            id: findInput
+
             onReturnPressed: if (!webView.findText(text)) infobox.showMessage(qsTr("No matches found"));
         }
 
@@ -407,10 +463,7 @@ Window {
         }
     }
 
-    FullscreenIndicator {
-        visible: (!toolBar.visible) && (!findToolBar.visible) && ((webView.moving) || (webView.atYBeginning) || (webView.status != WebView.Ready))
-        onClicked: window.fullScreen = !window.fullScreen
-    }
+    FullscreenIndicator {}
 
     InformationBox {
         id: infobox
@@ -451,12 +504,17 @@ Window {
         if (visible) {
             screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation : Screen.LandscapeOrientation);
 
+            if (qmlBrowserSettings.zoomWithVolumeKeys) {
+                volumeKeys.grab(window);
+            }
+
             if (webHistory.count == 0) {
                 webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
                 webHistory.load();
             }
         }
         else {
+            volumeKeys.release(window);
             webHistory.save();
         }
     }
