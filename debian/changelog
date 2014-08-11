@@ -1,3 +1,14 @@
+qml-browser (0.6.0) unstable; urgency=low
+
+  * Added option to zoom text only.
+  * Added option to use volume keys for zooming.
+  * Added option to set the user agent.
+  * Use cursor keys for scrolling.
+  * Keep 'fullscreen' button visible for 2 seconds after scrolling stops.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Mon, 11 Aug 2014 15:12:34 +0000
+
+
 qml-browser (0.5.3) unstable; urgency=low
 
   * Ship QML files instead of using QRC.
