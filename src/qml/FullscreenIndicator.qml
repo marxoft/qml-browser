@@ -16,12 +16,12 @@
  */
 
 import org.hildon.components 1.0
+import org.hildon.webkit 1.0
 
 Item {
     id: root
 
-    signal clicked
-
+    visible: (!toolBar.visible) && (!findToolBar.visible) && ((webView.moving) || (webView.atYBeginning) || (webView.status != WebView.Ready) || (!timer.timedOut))
     width: 80
     height: 80
     anchors {
@@ -48,6 +48,17 @@ Item {
     MouseArea {
         anchors.fill: parent
         preventStealing: true
-        onClicked: root.clicked()
+        onClicked: window.fullScreen = !window.fullScreen
+    }
+
+    Timer {
+        id: timer
+
+        property bool timedOut: false
+
+        interval: 2000
+        running: (!toolBar.visible) && (!findToolBar.visible) && (!webView.moving) && (!webView.atYBeginning) && (webView.status == WebView.Ready)
+        onRunningChanged: if (running) timedOut = false;
+        onTriggered: timedOut = true
     }
 }
