@@ -50,7 +50,7 @@ Page {
                 text: modelData.display
             }
         }
-        onClicked: {
+        onActivated: {
             window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
             pageStack.pop(window);
         }

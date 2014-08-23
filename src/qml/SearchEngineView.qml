@@ -80,7 +80,7 @@ ListView {
             height -= 1;
         }
     }
-    onClicked: {
+    onActivated: {
         switch (QModelIndex.row(currentIndex)) {
         case searchEngines.count - 1:
         {

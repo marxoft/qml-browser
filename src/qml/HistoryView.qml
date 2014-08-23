@@ -57,7 +57,7 @@ ListView {
         }
     }
     onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.source = "";
-    onClicked: {
+    onActivated: {
         if (window.url) {
             window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
         }

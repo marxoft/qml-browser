@@ -51,7 +51,7 @@ Page {
             }
         ]
 
-        onClicked: {
+        onActivated: {
             window.url = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
             pageStack.pop(window);
         }

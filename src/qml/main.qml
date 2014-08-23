@@ -108,7 +108,7 @@ Window {
             }
         ]
 
-        onClicked: window.loadBrowserWindow(bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
+        onActivated: window.loadBrowserWindow(bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
     }
 
     Label {
