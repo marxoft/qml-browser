@@ -500,6 +500,7 @@ Window {
         }
         else {
             volumeKeys.release(window);
+            webHistory.save();
         }
     }
 }

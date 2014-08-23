@@ -194,8 +194,5 @@ Window {
                 webHistory.load();
             }
         }
-        else {
-            webHistory.save();
-        }
     }
 }
