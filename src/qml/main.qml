@@ -86,6 +86,8 @@ Window {
         }
 
         contextMenuPolicy: Qt.ActionsContextMenu
+        horizontalScrollMode: ListView.ScrollPerItem
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: bookmarks
         iconSize: "150x64"
         actions: [

@@ -22,13 +22,15 @@ import "CreateObject.js" as ObjectCreator
 Page {
     id: page
 
-    windowTitle: qsTr("Bookmarks")    
+    windowTitle: qsTr("Bookmarks")
 
     ListView {
         id: view
 
         anchors.fill: parent
         contextMenuPolicy: Qt.ActionsContextMenu
+        horizontalScrollMode: ListView.ScrollPerItem
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: bookmarks
         iconSize: "150x64"
         actions: [

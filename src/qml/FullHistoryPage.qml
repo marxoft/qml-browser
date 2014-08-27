@@ -27,6 +27,8 @@ Page {
         id: view
 
         anchors.fill: parent
+        horizontalScrollMode: ListView.ScrollPerItem
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: webHistory.urls
         delegate: ListItem {
             width: view.width
