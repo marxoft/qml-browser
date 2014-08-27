@@ -18,11 +18,10 @@
 #ifndef BOOKMARKSMODEL_H
 #define BOOKMARKSMODEL_H
 
-#include <QAbstractListModel>
-#include <QDomDocument>
+#include <QStandardItemModel>
 #include <qdeclarative.h>
 
-class BookmarksModel : public QAbstractListModel
+class BookmarksModel : public QStandardItemModel
 {
     Q_OBJECT
 
@@ -33,22 +32,24 @@ class BookmarksModel : public QAbstractListModel
 public:
     enum Roles {
         TitleRole = Qt::UserRole + 1,
-        IconRole,
-        UrlRole
+        FaviconRole,
+        ThumbnailRole,
+        UrlRole,
+        TimeAddedRole,
+        TimeVisitedRole,
+        VisitCountRole
     };
 
     explicit BookmarksModel(QObject *parent = 0);
     ~BookmarksModel();
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-
     Q_INVOKABLE QVariant data(const QModelIndex &index, int role) const;
     Q_INVOKABLE bool setData(const QModelIndex &index, const QVariant &value, int role);
 
-    Q_INVOKABLE bool addBookmark(const QString &title, const QString &icon, const QString &url);
-    Q_INVOKABLE bool removeBookmark(const QString &url);
+    Q_INVOKABLE bool addBookmark(const QString &title, const QString &thumbnail, const QString &url, bool visited);
     Q_INVOKABLE bool removeBookmark(const QModelIndex &index);
-    Q_INVOKABLE bool removeBookmark(int row);
+
+    Q_INVOKABLE void urlVisited(const QString &url);
 
 public slots:
     void load();
@@ -58,8 +59,6 @@ signals:
     void countChanged();
     
 private:
-    QDomDocument m_document;
-
     Q_DISABLE_COPY(BookmarksModel)
 };
 
