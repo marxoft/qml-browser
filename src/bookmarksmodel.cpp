@@ -113,6 +113,11 @@ void BookmarksModel::urlVisited(const QString &url) {
 }
 
 void BookmarksModel::load() {
+    if (!QDir().mkpath(FILE_NAME.left(FILE_NAME.lastIndexOf("/")))) {
+        qDebug() << "Cannot create path for bookmarks";
+        return;
+    }
+
     QFile file(FILE_NAME);
     bool alt = false;
 
