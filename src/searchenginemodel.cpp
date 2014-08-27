@@ -98,17 +98,15 @@ void SearchEngineModel::addSearchEngine(const QString &name, const QString &icon
 void SearchEngineModel::removeSearchEngine(const QString &name) {
     for (int i = 0; i < m_list.size(); i++) {
         if (m_list.at(i).name == name) {
-            this->removeSearchEngine(i);
+            this->removeSearchEngine(this->index(i));
             return;
         }
     }
 }
 
 void SearchEngineModel::removeSearchEngine(const QModelIndex &index) {
-    this->removeSearchEngine(index.row());
-}
+    const int row = index.row();
 
-void SearchEngineModel::removeSearchEngine(int row) {
     if ((row >= 0) && (row < m_list.size())) {
         this->beginRemoveRows(QModelIndex(), row, row);
         QSettings(FILE_NAME, QSettings::NativeFormat).remove(m_list.takeAt(row).name);

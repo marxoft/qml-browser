@@ -53,7 +53,6 @@ public:
     Q_INVOKABLE void addSearchEngine(const QString &name, const QString &icon, const QString &url);
     Q_INVOKABLE void removeSearchEngine(const QString &name);
     Q_INVOKABLE void removeSearchEngine(const QModelIndex &index);
-    Q_INVOKABLE void removeSearchEngine(int row);
 
 public slots:
     void load();
