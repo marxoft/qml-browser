@@ -109,6 +109,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     }
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &bookmarks, SLOT(save()));
     QObject::connect(&app, SIGNAL(aboutToQuit()), &downloads, SLOT(save()));
 
     return app.exec();
