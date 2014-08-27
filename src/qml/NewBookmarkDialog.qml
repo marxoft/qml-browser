@@ -66,7 +66,7 @@ Dialog {
 
     onRejected: nameInput.focus = true
     onAccepted: {
-        if (bookmarks.addBookmark(nameInput.text, screenshot.fileName, addressInput.text)) {
+        if (bookmarks.addBookmark(nameInput.text, screenshot.fileName, addressInput.text, webView.url.toString() == addressInput.text)) {
             screenshot.grab();
             infobox.showMessage(qsTr("Bookmark added"));
         }
@@ -80,8 +80,10 @@ Dialog {
     ScreenShot {
         id: screenshot
 
+        width: 160
+        height: 96
         target: webView
-        fileName: "/home/user/.config/QMLBrowser/" + Qt.md5(webView.url) + ".jpg"
+        fileName: "/home/user/.config/QMLBrowser/bookmarks/" + Qt.md5(webView.url) + ".jpg"
         overwriteExistingFile: true
         smooth: true
     }
