@@ -120,5 +120,5 @@ void Utils::log(const QString &filePath, const QByteArray &message) {
 }
 
 QString Utils::versionNumber() {
-    return QString("0.6.0");
+    return QString("0.7.0");
 }
