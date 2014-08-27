@@ -2,6 +2,13 @@
 
 set -e
 
+if [ -e /home/user/.config/QMLBrowser/bookmarks.xml ]
+    then
+        echo "Removing old bookmarks"
+        rm /home/user/.config/QMLBrowser/bookmarks.xml
+        rm /home/user/.config/QMLBrowser/*.jpg
+fi
+
 if [ ! -e /home/user/.config/QMLBrowser/searchengines.conf ]
     then
         echo "[DuckDuckGo]
