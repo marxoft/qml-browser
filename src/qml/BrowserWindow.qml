@@ -180,7 +180,12 @@ Window {
             urlInput.cursorPosition = 0;
             viewLoader.source = "";
         }
-        onStatusChanged: if (status == WebView.Ready) screenshot.grab();
+        onStatusChanged: {
+            if (status == WebView.Ready) {
+                screenshot.grab();
+                bookmarks.urlVisited(url);
+            }
+        }
         onFocusChanged: if (focus) internal.menuFocusItem = webView;
         onDownloadRequested: {
             loader.source = Qt.resolvedUrl("SaveFileDialog.qml");
