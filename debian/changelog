@@ -1,6 +1,5 @@
 qml-browser (0.7.0) unstable; urgency=low
 
-  * Enable persistent storage in QtWebKit settings.
   * Save browsing history when any browser window is closed.
   * Sort bookmarks by last visited time, in descending order.
   * Load MicroB bookmarks if no QML Browser bookmarks exist.
