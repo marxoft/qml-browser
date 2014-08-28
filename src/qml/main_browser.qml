@@ -171,7 +171,7 @@ Window {
         userAgent: qmlBrowserSettings.userAgentString
         settings {
             pluginsEnabled: true
-            persistentStorageEnabled: true
+            //persistentStorageEnabled: true // Temporarily disabled due to stability issues
             privateBrowsingEnabled: qmlBrowserSettings.privateBrowsingEnabled
             autoLoadImages: qmlBrowserSettings.autoLoadImages
             javascriptEnabled: qmlBrowserSettings.javaScriptEnabled
