@@ -22,21 +22,27 @@ Dialog {
 
     height: window.inPortrait ? 300 : 200
     windowTitle: qsTr("About")
-    content: Row {
+    content: Column {
         anchors.fill: parent
 
-        Image {
-            width: 64
-            height: 64
-            source: "file:///usr/share/icons/hicolor/64x64/hildon/general_web.png"
+        Row {
+
+            Image {
+                width: 64
+                height: 64
+                source: "file:///usr/share/icons/hicolor/64x64/hildon/general_web.png"
+            }
+
+            Label {
+                font.bold: true
+                font.pixelSize: platformStyle.fontSizeLarge
+                text: "QML Browser " + qmlBrowserUtils.versionNumber
+            }
         }
 
         Label {
             wordWrap: true
-            text: "<b><font size='4'>QML Browser "
-                  + qmlBrowserUtils.versionNumber
-                  + "</font></b><br><br>"
-                  + qsTr("A simple web browser written using")
+            text: qsTr("A simple web browser written using")
                   + " Qt Components Hildon.<br><br>&copy; Stuart Howarth 2014"
         }
     }
