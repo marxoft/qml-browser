@@ -1,3 +1,14 @@
+qml-browser (0.8.0) unstable; urgency=low
+
+  * Fix display of icon in application list.
+  * Fix postinst script.
+  * Use secondary text color for URLs in bookmark list and webview history.
+  * Sort bookmarks by visit count, rather that last visit time.
+  * Disable scrolling using cursor keys to prevent conflicts in processing key events.
+  * Code re-factoring to make use of improvements to Qt Components Hildon.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Mon, 15 Sep 2014 00:39:12 +0000
+
 qml-browser (0.7.0) unstable; urgency=low
 
   * Save browsing history when any browser window is closed.
