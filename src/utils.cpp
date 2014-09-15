@@ -45,7 +45,7 @@ QString Utils::fileSizeFromBytes(double bytes) {
     else if (bytes > mb) {
         size = QString::number(bytes / mb, 'f', 2) + "MB";
     }
-    else if (bytes > kb){
+    else if (bytes > kb) {
         size = QString::number(bytes / kb, 'f', 2) + "kB";
     }
     else {
@@ -120,5 +120,5 @@ void Utils::log(const QString &filePath, const QByteArray &message) {
 }
 
 QString Utils::versionNumber() {
-    return QString("0.7.0");
+    return QString("0.8.0");
 }
