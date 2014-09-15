@@ -41,7 +41,7 @@ BookmarksModel::BookmarksModel(QObject *parent) :
     roles[TimeVisitedRole] = "timeVisited";
     roles[VisitCountRole] = "visitCount";
     this->setRoleNames(roles);
-    this->setSortRole(TimeVisitedRole);
+    this->setSortRole(VisitCountRole);
 }
 
 BookmarksModel::~BookmarksModel() {}
