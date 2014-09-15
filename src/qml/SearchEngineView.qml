@@ -25,9 +25,9 @@ ListView {
 
     anchors {
         left: parent.left
-        leftMargin: 10
+        leftMargin: platformStyle.paddingMedium
         right: parent.right
-        rightMargin: 10
+        rightMargin: platformStyle.paddingMedium
         bottom: toolBar.top
     }
     focus: true
@@ -42,17 +42,16 @@ ListView {
 
         ListItemImage {
             anchors.fill: parent
-            source: isCurrentItem ? "file:///etc/hildon/theme/images/TouchListBackgroundPressed.png"
-                                  : "file:///etc/hildon/theme/images/TouchListBackgroundNormal.png"
+            source: "image://theme/TouchListBackground" + (isCurrentItem ? "Pressed" : "Normal")
         }
 
-        ListItemText {
+        ListItemLabel {
             anchors {
                 top: parent.top
                 bottom: parent.bottom
                 left: parent.left
                 right: image.left
-                margins: 10
+                margins: platformStyle.paddingMedium
             }
             alignment: Qt.AlignLeft | Qt.AlignVCenter
             text: modelData.name + (row === searchEngines.count - 1 ? "" : " " + qsTr("Search") + ": '" + view.query + "'")
@@ -65,14 +64,14 @@ ListView {
             height: 48
             anchors {
                 right: parent.right
-                rightMargin: 10
+                rightMargin: platformStyle.paddingMedium
                 verticalCenter: parent.verticalCenter
             }
             source: "file://" + modelData.icon
             smooth: true
         }
     }
-    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.source = "";
+    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.sourceComponent = undefined;
     onQueryChanged: {
         // Hotfix to ensure the delegate paint() method is called.
         if (visible) {

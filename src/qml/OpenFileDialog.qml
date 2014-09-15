@@ -21,4 +21,5 @@ FileDialog {
     id: root
 
     onSelected: window.url ? window.url = "file://" + filePath : window.loadBrowserWindow("file://" + filePath)
+    onVisibleChanged: if (visible) cd("/home/user/MyDocs");
 }

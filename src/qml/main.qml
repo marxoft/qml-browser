@@ -37,7 +37,7 @@ Window {
         Action {
             text: qsTr("Open file")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("OpenFileDialog.qml");
+                loader.sourceComponent = fileDialog;
                 loader.item.open();
             }
         },
@@ -45,7 +45,7 @@ Window {
         Action {
             text: qsTr("Downloads")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("DownloadsDialog.qml");
+                loader.sourceComponent = downloadsDialog;
                 loader.item.open();
             }
         },
@@ -53,7 +53,7 @@ Window {
         Action {
             text: qsTr("Settings")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("SettingsDialog.qml");
+                loader.sourceComponent = settingsDialog;
                 loader.item.open();
             }
         },
@@ -61,7 +61,7 @@ Window {
         Action {
             text: qsTr("About")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("AboutDialog.qml");
+                loader.sourceComponent = aboutDialog;
                 loader.item.open();
             }
         }
@@ -70,7 +70,7 @@ Window {
     actions: Action {
         shortcut: "Ctrl+O"
         onTriggered: {
-            loader.source = Qt.resolvedUrl("OpenFileDialog.qml");
+            loader.sourceComponent = fileDialog;
             loader.item.open();
         }
     }
@@ -89,12 +89,12 @@ Window {
         horizontalScrollMode: ListView.ScrollPerItem
         horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: bookmarks
-        iconSize: "150x64"
+        delegate: BookmarkDelegate {}
         actions: [
             Action {
                 text: qsTr("Edit")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("EditBookmarkDialog.qml");
+                    loader.sourceComponent = bookmarkDialog;
                     loader.item.name = bookmarks.data(view.currentIndex, BookmarksModel.TitleRole);
                     loader.item.address = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
                     loader.item.open();
@@ -104,7 +104,7 @@ Window {
             Action {
                 text: qsTr("Delete")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("ConfirmBookmarkDeleteDialog.qml");
+                    loader.sourceComponent = deleteDialog;
                     loader.item.open();
                 }
             }
@@ -116,15 +116,11 @@ Window {
     Label {
         anchors {
             fill: parent
-            margins: 10
+            margins: platformStyle.paddingMedium
         }
         alignment: Qt.AlignCenter
-        font {
-            bold: true
-            pixelSize: 40
-        }
         color: platformStyle.disabledTextColor
-        text: qsTr("No bookmarks")
+        text: qsTr("(No bookmarks)")
         visible: bookmarks.count === 0
     }
 
@@ -143,17 +139,17 @@ Window {
             id: urlInput
 
             comboboxEnabled: webHistory.count > 0
-            onComboboxTriggered: viewLoader.source = (viewLoader.item ? "" : Qt.resolvedUrl("HistoryView.qml"))
+            onComboboxTriggered: viewLoader.sourceComponent = (viewLoader.item ? undefined : historyView)
             onTextEdited: {
                 if (text) {
-                    viewLoader.source = Qt.resolvedUrl("SearchEngineView.qml");
+                    viewLoader.sourceComponent = searchView;
                     viewLoader.item.query = text;
                 }
                 else {
-                    viewLoader.source = "";
+                    viewLoader.sourceComponent = undefined;
                 }
             }
-            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.source = "";
+            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.sourceComponent = undefined;
             onReturnPressed: {
                 window.loadBrowserWindow(urlFromTextInput(text));
                 clear();
@@ -185,16 +181,61 @@ Window {
     Loader {
         id: loader
     }
+    
+    Component {
+        id: historyView
+        
+        HistoryView {}
+    }
+    
+    Component {
+        id: searchView
+        
+        SearchEngineView {}
+    }
+    
+    Component {
+        id: downloadsDialog
+        
+        DownloadsDialog {}
+    }
+    
+    Component {
+        id: settingsDialog
+        
+        SettingsDialog {}
+    }
+    
+    Component {
+        id: fileDialog
+        
+        OpenFileDialog {}
+    }
+    
+    Component {
+        id: bookmarkDialog
+        
+        EditBookmarkDialog {}
+    }
+    
+    Component {
+        id: deleteDialog
+        
+        ConfirmBookmarkDeleteDialog {}
+    }
+    
+    Component {
+        id: aboutDialog
+        
+        AboutDialog {}
+    }
 
-    onVisibleChanged: {
-        // Temporary solution until the attached Component property is exposed
-        if (visible) {
-            screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation : Screen.LandscapeOrientation);
+    Component.onCompleted: {
+        screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation : Screen.LandscapeOrientation);
 
-            if (webHistory.count == 0) {
-                webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
-                webHistory.load();
-            }
+        if (webHistory.count == 0) {
+            webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
+            webHistory.load();
         }
     }
 }

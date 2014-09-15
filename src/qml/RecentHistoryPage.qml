@@ -30,7 +30,7 @@ Page {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: 10
+            margins: platformStyle.paddingMedium
         }
 
         ToolButton {
@@ -52,18 +52,18 @@ Page {
             verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
             model: window.history.items
             delegate: ListItem {
-                width: 480
+                width: 400
                 height: view.height
 
                 ListItemImage {
                     id: image
 
-                    height: 250
+                    height: 240
                     anchors {
                         left: parent.left
-                        leftMargin: 10
+                        leftMargin: platformStyle.paddingMedium
                         right: parent.right
-                        rightMargin: 10
+                        rightMargin: platformStyle.paddingMedium
                         top: parent.top
                     }
                     fillMode: ListItemImage.PreserveAspectCrop
@@ -81,14 +81,31 @@ Page {
                     }
                 }
 
-                ListItemText {
+                ListItemLabel {
+                    id: title
+                    
+                    height: 32
                     anchors {
                         left: image.left
                         right: image.right
                         top: image.bottom
-                        bottom: parent.bottom
+                        topMargin: platformStyle.paddingMedium
                     }
-                    text: modelData.title + "\n" + modelData.url
+                    text: modelData.title
+                }
+                
+                ListItemLabel {
+                    id: url
+                    
+                    height: 32
+                    anchors {
+                        left: image.left
+                        right: image.right
+                        top: title.bottom
+                    }
+                    color: platformStyle.secondaryTextColor
+                    font.pixelSize: platformStyle.fontSizeSmall
+                    text: modelData.url
                 }
             }
 
@@ -110,12 +127,8 @@ Page {
             margins: 100
         }
         alignment: Qt.AlignCenter
-        font {
-            bold: true
-            pixelSize: 40
-        }
         color: platformStyle.disabledTextColor
-        text: qsTr("No recent history")
+        text: qsTr("(No recent history)")
         visible: window.history.count === 0
     }
 }

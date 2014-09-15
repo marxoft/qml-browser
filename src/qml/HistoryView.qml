@@ -23,9 +23,9 @@ ListView {
 
     anchors {
         left: parent.left
-        leftMargin: 10
+        leftMargin: platformStyle.paddingMedium
         right: parent.right
-        rightMargin: 10
+        rightMargin: platformStyle.paddingMedium
         bottom: toolBar.top
     }
     focus: true
@@ -34,29 +34,8 @@ ListView {
     model: webHistory.urls
     horizontalScrollMode: ListView.ScrollPerItem
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-    delegate: ListItem {
-        width: view.width
-        height: 70
-
-        ListItemImage {
-            anchors.fill: parent
-            source: isCurrentItem ? "file:///etc/hildon/theme/images/TouchListBackgroundPressed.png"
-                                  : "file:///etc/hildon/theme/images/TouchListBackgroundNormal.png"
-        }
-
-        ListItemText {
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                left: parent.left
-                right: parent.right
-                margins: 10
-            }
-            alignment: Qt.AlignLeft | Qt.AlignVCenter
-            text: modelData.display
-        }
-    }
-    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.source = "";
+    delegate: HistoryDelegate {}
+    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.sourceComponent = undefined;
     onActivated: {
         if (window.url) {
             window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];

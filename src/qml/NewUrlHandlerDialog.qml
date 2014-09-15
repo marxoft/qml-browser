@@ -37,8 +37,6 @@ Dialog {
 
         TextField {
             id: nameInput
-
-            focus: true
         }
 
         Label {
@@ -64,6 +62,14 @@ Dialog {
         onClicked: root.accept()
     }
 
+    onVisibleChanged: {
+        if (visible) {
+            nameInput.clear();
+            regexpInput.clear();
+            commandInput.clear();
+            nameInput.focus = true;
+        }
+    }
     onAccepted: {
         if (launcher.addHandler(nameInput.text, regexpInput.text, commandInput.text)) {
             infobox.showMessage(qsTr("URL handler added"));
@@ -71,16 +77,5 @@ Dialog {
         else {
             infobox.showMessage(qsTr("Cannot add URL handler"));
         }
-
-        nameInput.clear();
-        regexpInput.clear();
-        commandInput.clear();
-        nameInput.focus = true;
-    }
-    onRejected: {
-        nameInput.clear();
-        regexpInput.clear();
-        commandInput.clear();
-        nameInput.focus = true;
     }
 }

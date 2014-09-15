@@ -37,8 +37,6 @@ Dialog {
 
         TextField {
             id: nameInput
-
-            focus: true
         }
 
         Label {
@@ -56,7 +54,10 @@ Dialog {
 
             text: qsTr("Icon path (optional)")
             valueText: iconPath ? iconPath : qsTr("None chosen")
-            onClicked: fileDialog.open()
+            onClicked: {
+                loader.sourceComponent = fileDialog;
+                loader.item.open();
+            }
         }
     }
 
@@ -66,24 +67,28 @@ Dialog {
         onClicked: root.accept()
     }
 
+    onVisibleChanged: {
+        if (visible) {
+            nameInput.clear();
+            addressInput.clear();
+            iconSelector.iconPath = "";
+            nameInput.focus = true;
+        }
+    }
     onAccepted: {
         searchEngines.addSearchEngine(nameInput.text, iconSelector.iconPath, addressInput.text);
         infobox.showMessage(qsTr("Search engine added"));
-        nameInput.clear();
-        addressInput.clear();
-        iconSelector.iconPath = "";
-        nameInput.focus = true;
     }
-    onRejected: {
-        nameInput.clear();
-        addressInput.clear();
-        iconSelector.iconPath = "";
-        nameInput.focus = true;
+    
+    Loader {
+        id: loader
     }
-
-    FileDialog {
+    
+    Component {
         id: fileDialog
-
-        onSelected: iconSelector.iconPath = filePath
+        
+        FileDialog {
+            onSelected: iconSelector.iconPath = filePath
+        }
     }
 }

@@ -33,8 +33,6 @@ Dialog {
 
         TextField {
             id: nameInput
-
-            focus: true
         }
 
         ValueButton {
@@ -42,7 +40,10 @@ Dialog {
 
             text: qsTr("Location")
             valueText: root.location ? root.location : "N900"
-            onClicked: locationDialog.open()
+            onClicked: {
+                loader.sourceComponent = locationDialog;
+                loader.item.open();
+            }
         }
     }
 
@@ -52,21 +53,25 @@ Dialog {
         onClicked: /[\/]/g.test(nameInput.text) ? infobox.showMessage("'/' " + qsTr("character not allowed")) : root.accept()
     }
 
-    onAccepted: {
-        downloads.addDownload(request.url, request.headers, (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text);
-        nameInput.clear();
-        root.location = "";
-        nameInput.focus = true;
+    onVisibleChanged: {
+        if (visible) {
+            nameInput.clear();
+            root.location = "";
+            nameInput.focus = true;
+        }
     }
-    onRejected: {
-        nameInput.clear();
-        root.location = "";
-        nameInput.focus = true;
+    onAccepted: downloads.addDownload(request.url, request.headers, (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text)
+    
+    Loader {
+        id: loader
     }
 
-    FolderDialog {
+    Component {
         id: locationDialog
-
-        onSelected: root.location = (folder[folder.length - 1] == "/" ? folder : folder + "/")
+        
+        FolderDialog {
+            onSelected: root.location = (folder[folder.length - 1] == "/" ? folder : folder + "/")
+            onVisibleChanged: if (visible) cd("/home/user/MyDocs");
+        }
     }
 }

@@ -78,7 +78,7 @@ Window {
         Action {
             text: qsTr("Downloads")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("DownloadsDialog.qml");
+                loader.sourceComponent = downloadsDialog;
                 loader.item.open();
             }
         },
@@ -86,7 +86,7 @@ Window {
         Action {
             text: qsTr("Settings")
             onTriggered: {
-                loader.source = Qt.resolvedUrl("SettingsDialog.qml");
+                loader.sourceComponent = settingsDialog;
                 loader.item.open();
             }
         }
@@ -96,7 +96,7 @@ Window {
         Action {
             shortcut: "Ctrl+O"
             onTriggered: {
-                loader.source = Qt.resolvedUrl("OpenFileDialog.qml");
+                loader.sourceComponent = fileDialog;
                 loader.item.open();
             }
         },
@@ -121,7 +121,7 @@ Window {
         Action {
             shortcut: "Ctrl+D"
             onTriggered: {
-                loader.source = Qt.resolvedUrl("NewBookmarkDialog.qml");
+                loader.sourceComponent = bookmarkDialog;
                 loader.item.name = webView.title;
                 loader.item.address = webView.url;
                 loader.item.open();
@@ -178,7 +178,7 @@ Window {
         onUrlChanged: {
             urlInput.text = url;
             urlInput.cursorPosition = 0;
-            viewLoader.source = "";
+            viewLoader.sourceComponent = undefined;
         }
         onStatusChanged: {
             if (status == WebView.Ready) {
@@ -188,13 +188,13 @@ Window {
         }
         onFocusChanged: if (focus) internal.menuFocusItem = webView;
         onDownloadRequested: {
-            loader.source = Qt.resolvedUrl("SaveFileDialog.qml");
+            loader.sourceComponent = saveFileDialog;
             loader.item.fileName = request.url.toString().substring(request.url.toString().lastIndexOf("/") + 1);
             loader.item.request = request;
             loader.item.open();
         }
         onUnsupportedContent: {
-            loader.source = Qt.resolvedUrl("SaveFileDialog.qml");
+            loader.sourceComponent = saveFileDialog;
             var fileName;
 
             if (content.headers["Content-disposition"]) {
@@ -226,7 +226,7 @@ Window {
             Action {
                 text: qsTr("Add bookmark")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("NewBookmarkDialog.qml");
+                    loader.sourceComponent = bookmarkDialog;
                     loader.item.name = webView.hitContent.linkText ? webView.hitContent.linkText : webView.title;
                     loader.item.address = webView.hitContent.linkUrl.toString() ? webView.hitContent.linkUrl : webView.url;
                     loader.item.open();
@@ -243,7 +243,7 @@ Window {
                 text: qsTr("Save link as")
                 visible: (webView.hitContent) && (webView.hitContent.linkUrl.toString()) ? true : false
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("SaveFileDialog.qml");
+                    loader.sourceComponent = saveFileDialog;
                     loader.item.fileName = webView.hitContent.linkUrl.toString().substring(webView.hitContent.linkUrl.toString().lastIndexOf("/") + 1);
                     loader.item.request = { "url": webView.hitContent.linkUrl };
                     loader.item.open();
@@ -253,7 +253,7 @@ Window {
 
         Keys.onPressed: {
             switch (event.key) {
-            case Qt.Key_Up:
+            /*case Qt.Key_Up:
                 if (event.modifiers & Qt.ShiftModifier) {
                     webView.contentY = 0;
                 }
@@ -288,7 +288,7 @@ Window {
                     webView.contentX += 20;
                 }
 
-                break;
+                break;*/
             case Qt.Key_F8:
                 webView.zoomFactor -= 0.1;
                 break;
@@ -417,14 +417,14 @@ Window {
             showProgressIndicator: webView.status == WebView.Loading
             progress: webView.progress
             comboboxEnabled: webHistory.count > 0
-            onComboboxTriggered: viewLoader.source = (viewLoader.item ? "" : Qt.resolvedUrl("HistoryView.qml"))
+            onComboboxTriggered: viewLoader.sourceComponent = (viewLoader.item ? undefined : historyView)
             onTextEdited: {
                 if (text) {
-                    viewLoader.source = Qt.resolvedUrl("SearchEngineView.qml");
+                    viewLoader.sourceComponent = searchView;
                     viewLoader.item.query = text;
                 }
                 else {
-                    viewLoader.source = "";
+                    viewLoader.sourceComponent = undefined;
                 }
             }
             onFocusChanged: {
@@ -432,7 +432,7 @@ Window {
                     internal.menuFocusItem = urlInput;
                 }
                 else if ((viewLoader.item) && (!viewLoader.item.focus)) {
-                    viewLoader.source = "";
+                    viewLoader.sourceComponent = undefined;
                 }
             }
             onReturnPressed: webView.url = urlFromTextInput(text)
@@ -496,17 +496,52 @@ Window {
     Loader {
         id: loader
     }
-
-    onVisibleChanged: {
-        // Temporary solution until the attached Component property is exposed
-        if (visible) {
-            if (qmlBrowserSettings.zoomWithVolumeKeys) {
-                volumeKeys.grab(window);
-            }
-        }
-        else {
-            volumeKeys.release(window);
-            webHistory.save();
-        }
+    
+    Component {
+        id: historyView
+        
+        HistoryView {}
+    }
+    
+    Component {
+        id: searchView
+        
+        SearchEngineView {}
+    }
+    
+    Component {
+        id: downloadsDialog
+        
+        DownloadsDialog {}
+    }
+    
+    Component {
+        id: settingsDialog
+        
+        SettingsDialog {}
+    }
+    
+    Component {
+        id: fileDialog
+        
+        OpenFileDialog {}
+    }
+    
+    Component {
+        id: saveFileDialog
+        
+        SaveFileDialog {}
+    }
+    
+    Component {
+        id: bookmarkDialog
+        
+        NewBookmarkDialog {}
+    }
+    
+    Component.onCompleted: if (qmlBrowserSettings.zoomWithVolumeKeys) volumeKeys.grab(window);
+    Component.onDestruction: {
+        volumeKeys.release(window);
+        webHistory.save();
     }
 }

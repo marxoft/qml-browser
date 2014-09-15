@@ -21,7 +21,7 @@ import org.hildon.browser 1.0
 Dialog {
     id: root
 
-    height: window.inPortrait ? 600 : 340
+    height: window.inPortrait ? 680 : 360
     windowTitle: qsTr("Downloads")
     content: TableView {
         id: view
@@ -61,7 +61,7 @@ Dialog {
         Label {
             anchors.top: header.bottom
             color: platformStyle.disabledTextColor
-            text: "(" + qsTr("no files downloading") + ")"
+            text: qsTr("(no files downloading)")
             visible: downloads.count == 0
         }
     }
@@ -78,17 +78,26 @@ Dialog {
             text: qsTr("Delete")
             enabled: QModelIndex.isValid(view.currentIndex)
             visible: downloads.count > 0
-            onClicked: deleteDialog.open()
+            onClicked: {
+                loader.sourceComponent = deleteDialog;
+                loader.item.open();
+            }
         }
     ]
+    
+    Loader {
+        id: loader
+    }
 
-    QueryDialog {
+    Component {
         id: deleteDialog
-
-        windowTitle: qsTr("Delete?")
-        message: qsTr("Delete download") + " '" + downloads.data(view.currentIndex, DownloadModel.NameRole) + "'?"
-        acceptButtonText: qsTr("Yes")
-        rejectButtonText: qsTr("No")
-        onAccepted: downloads.get(view.currentIndex).cancel()
+        
+        QueryDialog {
+            windowTitle: qsTr("Delete?")
+            message: qsTr("Delete download") + " '" + downloads.data(view.currentIndex, DownloadModel.NameRole) + "'?"
+            acceptButtonText: qsTr("Yes")
+            rejectButtonText: qsTr("No")
+            onAccepted: downloads.get(view.currentIndex).cancel()
+        }
     }
 }

@@ -21,7 +21,7 @@ import org.hildon.webkit 1.0
 Dialog {
     id: root
 
-    height: window.inPortrait ? 600 : 340
+    height: window.inPortrait ? 680 : 360
     windowTitle: qsTr("Settings")
     content: Flickable {
         id: flicker
@@ -79,7 +79,7 @@ Dialog {
             Button {
                 text: qsTr("Add custom URL handler")
                 onClicked: {
-                    loader.source = Qt.resolvedUrl("NewUrlHandlerDialog.qml");
+                    loader.sourceComponent = handlerDialog;
                     loader.item.open();
                 }
             }
@@ -213,6 +213,7 @@ Dialog {
         onClicked: root.accept()
     }
 
+    onVisibleChanged: if (visible) flicker.contentY = 0;
     onAccepted: {
         screen.orientationLock = (rotationCheckbox.checked ? Screen.AutoOrientation : Screen.LandscapeOrientation);
 
@@ -257,5 +258,11 @@ Dialog {
 
     Loader {
         id: loader
+    }
+    
+    Component {
+        id: handlerDialog
+        
+        NewUrlHandlerDialog {}
     }
 }

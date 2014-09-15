@@ -42,7 +42,6 @@ Dialog {
             id: nameInput
 
             width: parent.width - 100
-            focus: true
         }
 
         Label {
@@ -64,7 +63,13 @@ Dialog {
         onClicked: root.accept()
     }
 
-    onRejected: nameInput.focus = true
+    onVisibleChanged: {
+        if (visible) {
+            nameInput.clear();
+            addressInput.clear();
+            nameInput.focus = true;
+        }
+    }
     onAccepted: {
         if (bookmarks.addBookmark(nameInput.text, screenshot.fileName, addressInput.text, webView.url.toString() == addressInput.text)) {
             screenshot.grab();
@@ -73,8 +78,6 @@ Dialog {
         else {
             infobox.showMessage(qsTr("Cannot add bookmark"));
         }
-
-        nameInput.focus = true;
     }
 
     ScreenShot {

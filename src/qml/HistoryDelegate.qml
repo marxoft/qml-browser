@@ -16,35 +16,22 @@
  */
 
 import org.hildon.components 1.0
-import org.hildon.webkit 1.0
 
-Page {
-    id: root
+ListItem {
+    width: view.width
+    height: 70
 
-    windowTitle: qsTr("Complete browsing history")
-
-    ListView {
-        id: view
-
+    ListItemImage {
         anchors.fill: parent
-        horizontalScrollMode: ListView.ScrollPerItem
-        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-        model: webHistory.urls
-        delegate: HistoryDelegate {}
-        onActivated: {
-            window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
-            pageStack.pop(window);
-        }
+        source: "image://theme/TouchListBackground" + (isCurrentItem ? "Pressed" : "Normal")
     }
 
-    Label {
+    ListItemLabel {
         anchors {
             fill: parent
             margins: platformStyle.paddingMedium
         }
-        alignment: Qt.AlignCenter
-        color: platformStyle.disabledTextColor
-        text: qsTr("(No history)")
-        visible: webHistory.urls.length === 0
+        alignment: Qt.AlignLeft | Qt.AlignVCenter
+        text: modelData.display
     }
 }

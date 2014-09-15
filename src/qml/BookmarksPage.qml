@@ -32,12 +32,12 @@ Page {
         horizontalScrollMode: ListView.ScrollPerItem
         horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: bookmarks
-        iconSize: "150x64"
+        delegate: BookmarkDelegate {}
         actions: [
             Action {
                 text: qsTr("Edit")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("EditBookmarkDialog.qml");
+                    loader.sourceComponent = editDialog;
                     loader.item.name = bookmarks.data(view.currentIndex, BookmarksModel.TitleRole);
                     loader.item.address = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
                     loader.item.open();
@@ -47,7 +47,7 @@ Page {
             Action {
                 text: qsTr("Delete")
                 onTriggered: {
-                    loader.source = Qt.resolvedUrl("ConfirmBookmarkDeleteDialog.qml");
+                    loader.sourceComponent = deleteDialog;
                     loader.item.open();
                 }
             }
@@ -62,19 +62,27 @@ Page {
     Label {
         anchors {
             fill: parent
-            margins: 10
+            margins: platformStyle.paddingMedium
         }
         alignment: Qt.AlignCenter
-        font {
-            bold: true
-            pixelSize: 40
-        }
         color: platformStyle.disabledTextColor
-        text: qsTr("No bookmarks")
+        text: qsTr("(No bookmarks)")
         visible: bookmarks.count === 0
     }
 
     Loader {
         id: loader
+    }
+    
+    Component {
+        id: editDialog
+        
+        EditBookmarkDialog {}
+    }
+    
+    Component {
+        id: deleteDialog
+        
+        ConfirmBookmarkDeleteDialog {}
     }
 }
