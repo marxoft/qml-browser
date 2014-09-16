@@ -52,7 +52,7 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const {
 
 bool BookmarksModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (QStandardItemModel::setData(index, value, role)) {
-        if (role == TimeVisitedRole) {
+        if (role == this->sortRole()) {
             this->sort(0, Qt::DescendingOrder);
         }
 
@@ -72,11 +72,10 @@ bool BookmarksModel::addBookmark(const QString &title, const QString &thumbnail,
     if (visited) {
         item->setData(item->data(TimeAddedRole), TimeVisitedRole);
         item->setData(1, VisitCountRole);
-        this->insertRow(0, item);
     }
-    else {
-        this->appendRow(item);
-    }
+    
+    this->appendRow(item);
+    this->sort(0, Qt::DescendingOrder);
 
     emit countChanged();
     
