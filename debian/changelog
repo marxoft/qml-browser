@@ -1,3 +1,10 @@
+qml-browser (0.8.1) unstable; urgency=low
+
+  * Bug fix: Text fields unintentionally cleared in some dialogs (e.g NewBookmarkDialog) when the dialog is shown.
+  * Re-sort bookmarks when a new bookmark is added.
+
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Tue, 16 Sep 2014 23:59:12 +0000
+
 qml-browser (0.8.0) unstable; urgency=low
 
   * Fix display of icon in application list.
