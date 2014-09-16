@@ -62,14 +62,7 @@ Dialog {
         onClicked: root.accept()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            nameInput.clear();
-            regexpInput.clear();
-            commandInput.clear();
-            nameInput.focus = true;
-        }
-    }
+    onVisibleChanged: if (visible) nameInput.focus = true;
     onAccepted: {
         if (launcher.addHandler(nameInput.text, regexpInput.text, commandInput.text)) {
             infobox.showMessage(qsTr("URL handler added"));
@@ -77,5 +70,14 @@ Dialog {
         else {
             infobox.showMessage(qsTr("Cannot add URL handler"));
         }
+        
+        nameInput.clear();
+        regexpInput.clear();
+        commandInput.clear();
+    }
+    onRejected: {
+        nameInput.clear();
+        regexpInput.clear();
+        commandInput.clear();
     }
 }

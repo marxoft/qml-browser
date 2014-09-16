@@ -53,14 +53,17 @@ Dialog {
         onClicked: /[\/]/g.test(nameInput.text) ? infobox.showMessage("'/' " + qsTr("character not allowed")) : root.accept()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            nameInput.clear();
-            root.location = "";
-            nameInput.focus = true;
-        }
+    onVisibleChanged: if (visible) nameInput.focus = true;
+    onAccepted: {
+        downloads.addDownload(request.url, request.headers,
+                              (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text);
+        nameInput.clear();
+        root.location = "";
     }
-    onAccepted: downloads.addDownload(request.url, request.headers, (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text)
+    onRejected: {
+        nameInput.clear();
+        root.location = "";
+    }
     
     Loader {
         id: loader

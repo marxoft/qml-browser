@@ -67,17 +67,18 @@ Dialog {
         onClicked: root.accept()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            nameInput.clear();
-            addressInput.clear();
-            iconSelector.iconPath = "";
-            nameInput.focus = true;
-        }
-    }
+    onVisibleChanged: if (visible) nameInput.focus = true;
     onAccepted: {
         searchEngines.addSearchEngine(nameInput.text, iconSelector.iconPath, addressInput.text);
         infobox.showMessage(qsTr("Search engine added"));
+        nameInput.clear();
+        addressInput.clear();
+        iconSelector.iconPath = "";
+    }
+    onRejected: {
+        nameInput.clear();
+        addressInput.clear();
+        iconSelector.iconPath = "";
     }
     
     Loader {

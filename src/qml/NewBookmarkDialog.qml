@@ -63,13 +63,7 @@ Dialog {
         onClicked: root.accept()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            nameInput.clear();
-            addressInput.clear();
-            nameInput.focus = true;
-        }
-    }
+    onVisibleChanged: if (visible) nameInput.focus = true;
     onAccepted: {
         if (bookmarks.addBookmark(nameInput.text, screenshot.fileName, addressInput.text, webView.url.toString() == addressInput.text)) {
             screenshot.grab();
@@ -78,6 +72,13 @@ Dialog {
         else {
             infobox.showMessage(qsTr("Cannot add bookmark"));
         }
+        
+        nameInput.clear();
+        addressInput.clear();
+    }
+    onRejected: {
+        nameInput.clear();
+        addressInput.clear();
     }
 
     ScreenShot {

@@ -63,16 +63,17 @@ Dialog {
         onClicked: root.accept()
     }
 
-    onVisibleChanged: {
-        if (visible) {
-            nameInput.clear();
-            addressInput.clear();
-            nameInput.focus = true;
-        }
-    }
+    onVisibleChanged: if (visible) nameInput.focus = true;
     onAccepted: {
         if ((!bookmarks.setData(view.currentIndex, name, BookmarksModel.TitleRole)) || (!bookmarks.setData(view.currentIndex, address, BookmarksModel.UrlRole))) {
             infobox.showMessage(qsTr("Cannot edit bookmark"));
         }
-    }    
+        
+        nameInput.clear();
+        addressInput.clear();
+    }
+    onRejected: {
+        nameInput.clear();
+        addressInput.clear();
+    }
 }
