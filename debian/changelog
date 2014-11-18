@@ -1,3 +1,9 @@
+qml-browser (0.8.2) unstable; urgency=low
+
+  * SSL fix.
+  
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Tue, 18 Nov 2014 12:09:16 +0000
+
 qml-browser (0.8.1) unstable; urgency=low
 
   * Bug fix: Text fields unintentionally cleared in some dialogs (e.g NewBookmarkDialog) when the dialog is shown.
