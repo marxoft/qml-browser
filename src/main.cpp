@@ -28,6 +28,8 @@
 #include <QDeclarativeContext>
 #include <QDeclarativeComponent>
 #include <qdeclarative.h>
+#include <QSsl>
+#include <QSslConfiguration>
 #include <QDebug>
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
@@ -40,6 +42,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterUncreatableType<Download>("org.hildon.browser", 1, 0, "Download", "");
     qmlRegisterUncreatableType<DownloadModel>("org.hildon.browser", 1, 0, "DownloadModel", "");
     qmlRegisterUncreatableType<SearchEngineModel>("org.hildon.browser", 1, 0, "SearchEngineModel", "");
+    
+    QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    config.setProtocol(QSsl::TlsV1);
+    QSslConfiguration::setDefaultConfiguration(config);
 
     Settings settings;
     Utils utils;
