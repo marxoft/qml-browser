@@ -183,7 +183,7 @@ ApplicationWindow {
                     contentX = 0;
                 }
                 else {
-                    contentX = Math.max(0, webView - 20);
+                    contentX = Math.max(0, contentX - 20);
                 }
 
                 break;
