@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SETTINGS_H
@@ -24,17 +23,23 @@ class Settings : public QSettings
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool forceToolBarVisibleWhenLoading READ forceToolBarVisibleWhenLoading WRITE setForceToolBarVisibleWhenLoading NOTIFY forceToolBarVisibleWhenLoadingChanged)
-    Q_PROPERTY(bool openBrowserWindowsInFullScreen READ openBrowserWindowsInFullScreen WRITE setOpenBrowserWindowsInFullScreen NOTIFY openBrowserWindowsInFullScreenChanged)
+    Q_PROPERTY(bool forceToolBarVisibleWhenLoading READ forceToolBarVisibleWhenLoading
+               WRITE setForceToolBarVisibleWhenLoading NOTIFY forceToolBarVisibleWhenLoadingChanged)
+    Q_PROPERTY(bool openBrowserWindowsInFullScreen READ openBrowserWindowsInFullScreen
+               WRITE setOpenBrowserWindowsInFullScreen NOTIFY openBrowserWindowsInFullScreenChanged)
     Q_PROPERTY(bool rotationEnabled READ rotationEnabled WRITE setRotationEnabled NOTIFY rotationEnabledChanged)
-    Q_PROPERTY(bool zoomWithVolumeKeys READ zoomWithVolumeKeys WRITE setZoomWithVolumeKeys NOTIFY zoomWithVolumeKeysChanged)
-    Q_PROPERTY(bool useCustomURLHandlers READ useCustomURLHandlers WRITE setUseCustomURLHandlers NOTIFY useCustomURLHandlersChanged)
-    Q_PROPERTY(bool privateBrowsingEnabled READ privateBrowsingEnabled WRITE setPrivateBrowsingEnabled NOTIFY privateBrowsingEnabledChanged)
+    Q_PROPERTY(bool zoomWithVolumeKeys READ zoomWithVolumeKeys WRITE setZoomWithVolumeKeys
+               NOTIFY zoomWithVolumeKeysChanged)
+    Q_PROPERTY(bool useCustomURLHandlers READ useCustomURLHandlers WRITE setUseCustomURLHandlers
+               NOTIFY useCustomURLHandlersChanged)
+    Q_PROPERTY(bool privateBrowsingEnabled READ privateBrowsingEnabled WRITE setPrivateBrowsingEnabled
+               NOTIFY privateBrowsingEnabledChanged)
     Q_PROPERTY(bool autoLoadImages READ autoLoadImages WRITE setAutoLoadImages NOTIFY autoLoadImagesChanged)
     Q_PROPERTY(bool javaScriptEnabled READ javaScriptEnabled WRITE setJavaScriptEnabled NOTIFY javaScriptEnabledChanged)
     Q_PROPERTY(bool zoomTextOnly READ zoomTextOnly WRITE setZoomTextOnly NOTIFY zoomTextOnlyChanged)
     Q_PROPERTY(int defaultFontSize READ defaultFontSize WRITE setDefaultFontSize NOTIFY defaultFontSizeChanged)
-    Q_PROPERTY(QString defaultTextEncoding READ defaultTextEncoding WRITE setDefaultTextEncoding NOTIFY defaultTextEncodingChanged)
+    Q_PROPERTY(QString defaultTextEncoding READ defaultTextEncoding WRITE setDefaultTextEncoding
+               NOTIFY defaultTextEncodingChanged)
     Q_PROPERTY(QString userAgentString READ userAgentString WRITE setUserAgentString NOTIFY userAgentStringChanged)
 
 public:
@@ -77,7 +82,7 @@ public:
     QString userAgentString() const;
     void setUserAgentString(const QString &agent);
 
-signals:
+Q_SIGNALS:
     void forceToolBarVisibleWhenLoadingChanged();
     void openBrowserWindowsInFullScreenChanged();
     void rotationEnabledChanged();

@@ -15,34 +15,30 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
-import org.hildon.webkit 1.0
+import org.hildon.browser 1.0
 
 ListView {
     id: view
 
-    anchors {
-        left: parent.left
-        leftMargin: platformStyle.paddingMedium
-        right: parent.right
-        rightMargin: platformStyle.paddingMedium
-        bottom: toolBar.top
-    }
-    focus: true
-    height: Math.min(webHistory.count * 70, 280)
-    autoFillBackground: true
-    model: webHistory.urls
-    horizontalScrollMode: ListView.ScrollPerItem
+    anchors.fill: parent
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-    delegate: HistoryDelegate {}
-    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.sourceComponent = undefined;
-    onActivated: {
-        if (window.url) {
-            window.url = webHistory.urls[QModelIndex.row(view.currentIndex)];
-        }
-        else {
-            window.loadBrowserWindow(webHistory.urls[QModelIndex.row(view.currentIndex)]);
-            urlInput.clear();
+    boundsBehavior: ListView.StopAtBounds
+    clip: true
+    model: webHistory.urls
+    delegate: HistoryDelegate {
+        onClicked: {
+            if (window.url) {
+                window.url = webHistory.urls[index];
+            }
+            else {
+                window.loadBrowserWindow(webHistory.urls[index]);
+                urlInput.clear();
+            }
+            
+            viewLoader.sourceComponent = undefined
         }
     }
+    onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.sourceComponent = undefined;
 }

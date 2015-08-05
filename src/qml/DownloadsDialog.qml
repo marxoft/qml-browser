@@ -1,103 +1,103 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 import org.hildon.browser 1.0
 
 Dialog {
     id: root
 
-    height: window.inPortrait ? 680 : 360
-    windowTitle: qsTr("Downloads")
-    content: TableView {
+    height: screen.currentOrientation == Qt.WA_Maemo5PortraitOrientation ? 680 : 360
+    title: qsTr("Downloads")
+    
+    ListView {
         id: view
 
         anchors.fill: parent
-        selectionBehavior: TableView.SelectRows
-        showRowNumbers: false
-        showGrid: false
-        model: downloads
-        header: HeaderView {
-            id: header
-
-            anchors {
-                left: parent.left
-                right: parent.right
-            }
-            defaultAlignment: Qt.AlignLeft | Qt.AlignTop
-            stretchLastSection: true
-            clickable: false
-            sections: [
-                HeaderSection {
-                    text: qsTr("Name")
-                    width: window.inPortrait ? 200 : 300
-                },
-
-                HeaderSection {
-                    text: qsTr("Size")
-                    width: 150
-                },
-
-                HeaderSection {
-                    text: qsTr("Received")
-                }
-            ]
-        }
-
-        Label {
-            anchors.top: header.bottom
-            color: platformStyle.disabledTextColor
-            text: qsTr("(no files downloading)")
-            visible: downloads.count == 0
-        }
-    }
-
-    buttons: [
-        Button {
-            text: downloads.data(view.currentIndex, DownloadModel.IsRunningRole) === true ? qsTr("Pause") : qsTr("Resume")
-            enabled: QModelIndex.isValid(view.currentIndex)
-            visible: downloads.count > 0
-            onClicked: downloads.get(view.currentIndex).pause()
-        },
-
-        Button {
-            text: qsTr("Delete")
-            enabled: QModelIndex.isValid(view.currentIndex)
-            visible: downloads.count > 0
-            onClicked: {
-                loader.sourceComponent = deleteDialog;
-                loader.item.open();
-            }
-        }
-    ]
-    
-    Loader {
-        id: loader
-    }
-
-    Component {
-        id: deleteDialog
+        model: root.status == DialogStatus.Open ? downloads : null
+        delegate: ListItem {    
+            Label {
+                id: nameLabel
         
-        QueryDialog {
-            windowTitle: qsTr("Delete?")
-            message: qsTr("Delete download") + " '" + downloads.data(view.currentIndex, DownloadModel.NameRole) + "'?"
-            acceptButtonText: qsTr("Yes")
-            rejectButtonText: qsTr("No")
-            onAccepted: downloads.get(view.currentIndex).cancel()
+                anchors {
+                    left: parent.left
+                    right: progressBar.left
+                    top: parent.top
+                    margins: platformStyle.paddingMedium
+                }
+                elide: Text.ElideRight
+                text: name
+            }
+    
+            Label {
+                id: sizeLabel
+                anchors {
+                    left: parent.left
+                    right: progressBar.left
+                    bottom: parent.bottom
+                    margins: platformStyle.paddingMedium
+                }
+                elide: Text.ElideRight
+                color: error == Download.NoError ? platformStyle.secondaryTextColor : platformStyle.attentionColor
+                font.pointSize: platformStyle.fontSizeSmall
+                text: error == Download.NoError ? (running ? qsTr("Downloading") : qsTr("Waiting")) + ": "
+                                                   + qmlBrowserUtils.fileSizeFromBytes(bytesReceived) + " / "
+                                                   + qmlBrowserUtils.fileSizeFromBytes(size)
+                                                : qsTr("Failed")
+            }
+    
+            ProgressBar {
+                id: progressBar
+        
+                anchors {
+                    right: parent.right
+                    rightMargin: platformStyle.paddingMedium
+                    verticalCenter: parent.verticalCenter
+                }
+                width: 150
+                textVisible: true
+                text: progress + "%"
+            }
+            
+            onPressAndHold: contextMenu.popup()
+        }
+    }
+    
+    Label {
+        anchors.fill: parent
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: platformStyle.disabledTextColor
+        text: qsTr("(no files downloading)")
+        visible: downloads.count == 0
+    }
+    
+    Menu {
+        id: contextMenu
+        
+        MenuItem {
+            text: downloads.data(view.currentIndex, DownloadModel.IsRunningRole) === true ? qsTr("Pause")
+                                                                                          : qsTr("Resume")
+            onTriggered: downloads.get(view.currentIndex).pause()
+        }
+
+        MenuItem {
+            text: qsTr("Delete")
+            onTriggered: downloads.get(view.currentIndex).cancel()
         }
     }
 }

@@ -98,13 +98,13 @@ public:
     Error error() const;
     QString errorString() const;
 
-public slots:
+public Q_SLOTS:
     void queue();
     void start();
     void pause();
     void cancel();
 
-private slots:
+private Q_SLOTS:
     void setSize(qint64 size);
     void setBytesReceived(qint64 received);
     void setProgress(int progress);
@@ -115,7 +115,7 @@ private slots:
     void onReadyRead();
     void onReplyFinished();
 
-signals:
+Q_SIGNALS:
     void urlChanged();
     void headersChanged();
     void fileNameChanged();

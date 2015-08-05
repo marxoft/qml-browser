@@ -15,13 +15,14 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-import org.hildon.components 1.0
+import QtQuick 1.0
 import org.hildon.webkit 1.0
 
 Item {
     id: root
 
-    visible: (!toolBar.visible) && (!findToolBar.visible) && ((webView.moving) || (webView.atYBeginning) || (webView.status != WebView.Ready) || (!timer.timedOut))
+    visible: (!toolBar.visible) && ((flicker.moving) || (flicker.atYBeginning) || (webView.status == WebView.Loading)
+             || (!timer.timedOut))
     width: 80
     height: 80
     anchors {
@@ -42,13 +43,12 @@ Item {
         width: 64
         height: 64
         anchors.centerIn: parent
-        source: "file:///usr/share/icons/hicolor/64x64/hildon/general_fullsize.png"
+        source: "image://icon/general_fullsize"
     }
 
     MouseArea {
         anchors.fill: parent
-        preventStealing: true
-        onClicked: window.fullScreen = !window.fullScreen
+        onClicked: window.fullScreen ? window.showNormal() : window.showFullScreen()
     }
 
     Timer {
@@ -57,7 +57,7 @@ Item {
         property bool timedOut: false
 
         interval: 2000
-        running: (!toolBar.visible) && (!findToolBar.visible) && (!webView.moving) && (!webView.atYBeginning) && (webView.status == WebView.Ready)
+        running: (!toolBar.visible) && (!flicker.moving) && (!flicker.atYBeginning) && (webView.status == WebView.Loading)
         onRunningChanged: if (running) timedOut = false;
         onTriggered: timedOut = true
     }

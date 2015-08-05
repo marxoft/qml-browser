@@ -15,23 +15,19 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 
 ListItem {
-    width: view.width
-    height: 70
+    id: root
 
-    ListItemImage {
-        anchors.fill: parent
-        source: "image://theme/TouchListBackground" + (isCurrentItem ? "Pressed" : "Normal")
-    }
-
-    ListItemLabel {
+    Label {
         anchors {
             fill: parent
             margins: platformStyle.paddingMedium
         }
-        alignment: Qt.AlignLeft | Qt.AlignVCenter
-        text: modelData.display
+        verticalAlignment: Text.AlignVCenter
+        elide: Text.ElideRight
+        text: modelData
     }
 }

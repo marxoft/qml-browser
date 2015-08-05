@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 import org.hildon.browser 1.0
 
@@ -23,29 +23,13 @@ ListView {
 
     property string query
 
-    anchors {
-        left: parent.left
-        leftMargin: platformStyle.paddingMedium
-        right: parent.right
-        rightMargin: platformStyle.paddingMedium
-        bottom: toolBar.top
-    }
-    focus: true
-    height: Math.min(searchEngines.count * 70, 280)
-    autoFillBackground: true
-    model: searchEngines
-    horizontalScrollMode: ListView.ScrollPerItem
+    anchors.fill: parent
     horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+    boundsBehavior: ListView.StopAtBounds
+    clip: true
+    model: searchEngines
     delegate: ListItem {
-        width: view.width
-        height: 70
-
-        ListItemImage {
-            anchors.fill: parent
-            source: "image://theme/TouchListBackground" + (isCurrentItem ? "Pressed" : "Normal")
-        }
-
-        ListItemLabel {
+        Label {
             anchors {
                 top: parent.top
                 bottom: parent.bottom
@@ -53,11 +37,12 @@ ListView {
                 right: image.left
                 margins: platformStyle.paddingMedium
             }
-            alignment: Qt.AlignLeft | Qt.AlignVCenter
-            text: modelData.name + (row === searchEngines.count - 1 ? "" : " " + qsTr("Search") + ": '" + view.query + "'")
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            text: name + (index == searchEngines.count - 1 ? "" : " " + qsTr("Search") + ": '" + view.query + "'")
         }
 
-        ListItemImage {
+        Image {
             id: image
 
             width: 48
@@ -67,32 +52,23 @@ ListView {
                 rightMargin: platformStyle.paddingMedium
                 verticalCenter: parent.verticalCenter
             }
-            source: "file://" + modelData.icon
+            source: "file://" + icon
             smooth: true
         }
+        
+        onClicked: {
+            if (index == searchEngines.count - 1) {
+                dialogs.showSearchEngineDialog();
+            }
+            else {
+                window.loadBrowserWindow(searchEngines.data(index, SearchEngineModel.UrlRole).toString()
+                                                           .replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
+                urlInput.clear();
+            }
+            
+            viewLoader.sourceComponent = undefined
+        }
     }
+    
     onFocusChanged: if ((!focus) && (!urlInput.focus)) viewLoader.sourceComponent = undefined;
-    onQueryChanged: {
-        // Hotfix to ensure the delegate paint() method is called.
-        if (visible) {
-            height += 1;
-            height -= 1;
-        }
-    }
-    onActivated: {
-        switch (QModelIndex.row(currentIndex)) {
-        case searchEngines.count - 1:
-        {
-            loader.source = Qt.resolvedUrl("NewSearchEngineDialog.qml");
-            loader.item.open();
-            break;
-        }
-        default:
-        {
-            window.loadBrowserWindow(searchEngines.data(currentIndex, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, query.replace(/\s+/g, "+")));
-            urlInput.clear();
-            break;
-        }
-        }
-    }
 }

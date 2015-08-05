@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "bookmarksmodel.h"
@@ -40,8 +39,8 @@ BookmarksModel::BookmarksModel(QObject *parent) :
     roles[TimeAddedRole] = "timeAdded";
     roles[TimeVisitedRole] = "timeVisited";
     roles[VisitCountRole] = "visitCount";
-    this->setRoleNames(roles);
-    this->setSortRole(VisitCountRole);
+    setRoleNames(roles);
+    setSortRole(VisitCountRole);
 }
 
 BookmarksModel::~BookmarksModel() {}
@@ -50,16 +49,24 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const {
     return QStandardItemModel::data(index, role);
 }
 
+QVariant BookmarksModel::data(int row, int role) const {
+    return data(index(row, 0), role);
+}
+
 bool BookmarksModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (QStandardItemModel::setData(index, value, role)) {
-        if (role == this->sortRole()) {
-            this->sort(0, Qt::DescendingOrder);
+        if (role == sortRole()) {
+            sort(0, Qt::DescendingOrder);
         }
 
         return true;
     }
 
     return false;
+}
+
+bool BookmarksModel::setData(int row, const QVariant &value, int role) {
+    return setData(index(row, 0), value, role);
 }
 
 bool BookmarksModel::addBookmark(const QString &title, const QString &thumbnail, const QString &url, bool visited) {
@@ -74,18 +81,18 @@ bool BookmarksModel::addBookmark(const QString &title, const QString &thumbnail,
         item->setData(1, VisitCountRole);
     }
     
-    this->appendRow(item);
-    this->sort(0, Qt::DescendingOrder);
+    appendRow(item);
+    sort(0, Qt::DescendingOrder);
 
     emit countChanged();
     
     return true;
 }
 
-bool BookmarksModel::removeBookmark(const QModelIndex &index) {
-    QString thumbnail = this->data(index, ThumbnailRole).toString();
+bool BookmarksModel::removeBookmark(int row) {
+    QString thumbnail = data(row, ThumbnailRole).toString();
 
-    if (this->removeRows(index.row(), 1)) {
+    if (removeRows(row, 1)) {
         emit countChanged();
 
         if (thumbnail.startsWith(THUMBNAILS_DIR)) {
@@ -100,12 +107,12 @@ bool BookmarksModel::removeBookmark(const QModelIndex &index) {
 }
 
 void BookmarksModel::urlVisited(const QString &url) {
-    for (int i = 0; i < this->rowCount(); i++) {
-        const QModelIndex index = this->index(i, 0);
+    for (int i = 0; i < rowCount(); i++) {
+        const QModelIndex idx = index(i, 0);
 
-        if (this->data(index, UrlRole) == url) {
-            this->setData(index, this->data(index, VisitCountRole).toInt() + 1, VisitCountRole);
-            this->setData(index, QDateTime::currentMSecsSinceEpoch() / 1000, TimeVisitedRole);
+        if (data(idx, UrlRole) == url) {
+            setData(idx, data(idx, VisitCountRole).toInt() + 1, VisitCountRole);
+            setData(idx, QDateTime::currentMSecsSinceEpoch() / 1000, TimeVisitedRole);
             return;
         }
     }
@@ -182,12 +189,12 @@ void BookmarksModel::load() {
                         item->setData(((alt) && (!thumbnail.startsWith("/")) ? ALT_THUMBNAILS_DIR : "") + thumbnail, ThumbnailRole);
                     }
 
-                    this->appendRow(item);
+                    appendRow(item);
                 }
             }
         }
 
-        this->sort(0, Qt::DescendingOrder);
+        sort(0, Qt::DescendingOrder);
         emit countChanged();
     }
     else {
@@ -216,18 +223,18 @@ bool BookmarksModel::save() {
         writer.writeEndElement(); // metadata
         writer.writeEndElement(); // info
 
-        for (int i = 0; i < this->rowCount(); i++) {
-            const QModelIndex index = this->index(i, 0);
+        for (int i = 0; i < rowCount(); i++) {
+            const QModelIndex idx = index(i, 0);
             writer.writeStartElement("bookmark");
-            writer.writeAttribute("href", this->data(index, UrlRole).toString());
-            writer.writeAttribute("favicon", this->data(index, FaviconRole).toString());
-            writer.writeAttribute("thumbnail", this->data(index, ThumbnailRole).toString());
-            writer.writeTextElement("title", this->data(index, TitleRole).toString());
+            writer.writeAttribute("href", data(idx, UrlRole).toString());
+            writer.writeAttribute("favicon", data(idx, FaviconRole).toString());
+            writer.writeAttribute("thumbnail", data(idx, ThumbnailRole).toString());
+            writer.writeTextElement("title", data(idx, TitleRole).toString());
             writer.writeStartElement("info");
             writer.writeStartElement("metadata");
-            writer.writeTextElement("time_added", this->data(index, TimeAddedRole).toString());
-            writer.writeTextElement("time_visited", this->data(index, TimeVisitedRole).toString());
-            writer.writeTextElement("visit_count", this->data(index, VisitCountRole).toString());
+            writer.writeTextElement("time_added", data(idx, TimeAddedRole).toString());
+            writer.writeTextElement("time_visited", data(idx, TimeVisitedRole).toString());
+            writer.writeTextElement("visit_count", data(idx, VisitCountRole).toString());
             writer.writeEndElement(); // metadata
             writer.writeEndElement(); // info
             writer.writeEndElement(); // bookmark

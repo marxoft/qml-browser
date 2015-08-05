@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 
 Dialog {
@@ -24,27 +24,40 @@ Dialog {
     property alias address: addressInput.text
     property alias icon: iconSelector.iconPath
 
-    height: window.inPortrait ? 420 : 320
-    windowTitle: qsTr("Add search engine")
-    content: Column {
+    height: column.height + platformStyle.paddingMedium
+    title: qsTr("Add search engine")
+    
+    Column {
         id: column
 
-        anchors.fill: parent
+        anchors {
+            left: parent.left
+            right: acceptButton.left
+            rightMargin: platformStyle.paddingMedium
+            bottom: parent.bottom
+        }
+        spacing: platformStyle.paddingMedium
 
         Label {
+            width: parent.width
             text: qsTr("Name")
         }
 
         TextField {
             id: nameInput
+            
+            width: parent.width
         }
 
         Label {
+            width: parent.width
             text: qsTr("Address") + " (" + qsTr("replace query string with") + " '%QUERY%')"
         }
 
         TextField {
             id: addressInput
+            
+            width: parent.width
         }
 
         ValueButton {
@@ -52,25 +65,62 @@ Dialog {
 
             property string iconPath
 
+            width: parent.width
             text: qsTr("Icon path (optional)")
             valueText: iconPath ? iconPath : qsTr("None chosen")
-            onClicked: {
-                loader.sourceComponent = fileDialog;
-                loader.item.open();
-            }
+            onClicked: fileDialog.open()
         }
     }
 
-    buttons: Button {
+    Button {
+        id: acceptButton
+        
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
         text: qsTr("Save")
         enabled: (nameInput.text != "") && (addressInput.text != "")
         onClicked: root.accept()
     }
+    
+    StateGroup {
+        states: State {
+            name: "Portrait"
+            when: screen.currentOrientation == Qt.WA_Maemo5PortraitOrientation
+            
+            PropertyChanges {
+                target: root
+                height: column.height + acceptButton.height + platformStyle.paddingMedium
+            }
+        
+            AnchorChanges {
+                target: column
+                anchors {
+                    right: parent.right
+                    bottom: button.top
+                }
+            }
+        
+            PropertyChanges {
+                target: column
+                anchors {
+                    rightMargin: 0
+                    bottomMargin: platformStyle.paddingMedium
+                }
+            }
+        
+            PropertyChanges {
+                target: acceptButton
+                width: parent.width
+            }
+        }
+    }
 
-    onVisibleChanged: if (visible) nameInput.focus = true;
+    onStatusChanged: if (status == DialogStatus.Open) nameInput.forceActiveFocus();
     onAccepted: {
         searchEngines.addSearchEngine(nameInput.text, iconSelector.iconPath, addressInput.text);
-        infobox.showMessage(qsTr("Search engine added"));
+        informationBox.information(qsTr("Search engine added"));
         nameInput.clear();
         addressInput.clear();
         iconSelector.iconPath = "";
@@ -81,15 +131,9 @@ Dialog {
         iconSelector.iconPath = "";
     }
     
-    Loader {
-        id: loader
-    }
-    
-    Component {
+    FileDialog {
         id: fileDialog
         
-        FileDialog {
-            onSelected: iconSelector.iconPath = filePath
-        }
+        onAccepted: iconSelector.iconPath = filePath
     }
 }

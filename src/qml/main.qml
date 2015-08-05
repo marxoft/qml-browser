@@ -1,77 +1,63 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
-import org.hildon.webkit 1.0
 import org.hildon.browser 1.0
 import "CreateObject.js" as ObjectCreator
 
-Window {
+ApplicationWindow {
     id: window
 
     function loadBrowserWindow(url) {
         var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"));
-        browser.fullScreen = qmlBrowserSettings.openBrowserWindowsInFullScreen;
+        
+        if (qmlBrowserSettings.openBrowserWindowsInFullScreen) {
+            browser.showFullScreen();
+        }
+        else {
+            browser.show();
+        }
 
         if (url) {
             browser.url = url;
         }
     }
 
-    windowTitle: "QML Browser"
-    tools: [
-        Action {
+    visible: true
+    title: "QML Browser"
+    menuBar: MenuBar {
+        MenuItem {
             text: qsTr("Open file")
-            onTriggered: {
-                loader.sourceComponent = fileDialog;
-                loader.item.open();
-            }
-        },
-
-        Action {
-            text: qsTr("Downloads")
-            onTriggered: {
-                loader.sourceComponent = downloadsDialog;
-                loader.item.open();
-            }
-        },
-
-        Action {
-            text: qsTr("Settings")
-            onTriggered: {
-                loader.sourceComponent = settingsDialog;
-                loader.item.open();
-            }
-        },
-
-        Action {
-            text: qsTr("About")
-            onTriggered: {
-                loader.sourceComponent = aboutDialog;
-                loader.item.open();
-            }
+            onTriggered: dialogs.showFileDialog()
         }
-    ]
 
-    actions: Action {
-        shortcut: "Ctrl+O"
-        onTriggered: {
-            loader.sourceComponent = fileDialog;
-            loader.item.open();
+        MenuItem {
+            text: qsTr("Downloads")
+            onTriggered: dialogs.showDownloadsDialog()
+        }
+
+        MenuItem {
+            text: qsTr("Settings")
+            onTriggered: dialogs.showSettingsDialog()
+        }
+
+        MenuItem {
+            text: qsTr("About")
+            onTriggered: dialogs.showAboutDialog()
         }
     }
 
@@ -84,33 +70,34 @@ Window {
             top: parent.top
             bottom: toolBar.top
         }
-
-        contextMenuPolicy: Qt.ActionsContextMenu
-        horizontalScrollMode: ListView.ScrollPerItem
         horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
         model: bookmarks
-        delegate: BookmarkDelegate {}
-        actions: [
-            Action {
-                text: qsTr("Edit")
-                onTriggered: {
-                    loader.sourceComponent = bookmarkDialog;
-                    loader.item.name = bookmarks.data(view.currentIndex, BookmarksModel.TitleRole);
-                    loader.item.address = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
-                    loader.item.open();
-                }
-            },
-
-            Action {
-                text: qsTr("Delete")
-                onTriggered: {
-                    loader.sourceComponent = deleteDialog;
-                    loader.item.open();
-                }
+        delegate: BookmarkDelegate {
+            onClicked: window.loadBrowserWindow(bookmarks.data(index, BookmarksModel.UrlRole))
+            onPressAndHold: contextMenu.popup()
+        }
+        
+        Keys.onPressed: {
+            if ((event.key == Qt.Key_O) && (event.modifiers == Qt.ControlModifier)) {
+                dialogs.showFileDialog();
+                event.accepted = true;
             }
-        ]
+        }
+    }
+    
+    Menu {
+        id: contextMenu
+        
+        MenuItem {
+            text: qsTr("Edit")
+            onTriggered: dialogs.showBookmarkDialog(bookmarks.data(view.currentIndex, BookmarksModel.TitleRole),
+                                                    bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
+        }
 
-        onActivated: window.loadBrowserWindow(bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
+        MenuItem {
+            text: qsTr("Delete")
+            onTriggered: bookmarks.removeBookmark(view.currentIndex)
+        }
     }
 
     Label {
@@ -118,7 +105,8 @@ Window {
             fill: parent
             margins: platformStyle.paddingMedium
         }
-        alignment: Qt.AlignCenter
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
         color: platformStyle.disabledTextColor
         text: qsTr("(No bookmarks)")
         visible: bookmarks.count === 0
@@ -128,19 +116,15 @@ Window {
         id: toolBar
 
         height: 75
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        movable: false
+        anchors.bottom: parent.bottom
 
         UrlInputField {
             id: urlInput
 
+            width: parent.width
             comboboxEnabled: webHistory.count > 0
             onComboboxTriggered: viewLoader.sourceComponent = (viewLoader.item ? undefined : historyView)
-            onTextEdited: {
+            onTextChanged: {
                 if (text) {
                     viewLoader.sourceComponent = searchView;
                     viewLoader.item.query = text;
@@ -150,7 +134,7 @@ Window {
                 }
             }
             onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.sourceComponent = undefined;
-            onReturnPressed: {
+            onAccepted: {
                 window.loadBrowserWindow(urlFromTextInput(text));
                 clear();
             }
@@ -158,28 +142,104 @@ Window {
     }
 
     InformationBox {
-        id: infobox
+        id: informationBox
 
-        function showMessage(message) {
-            label.text = message;
+        function information(message) {
+            informationLabel.text = message;
             open();
         }
+        
+        height: informationLabel.height + platformStyle.paddingLarge
 
-        content: Label {
-            id: label
+        Label {
+            id: informationLabel
 
-            anchors.fill: parent
-            alignment: Qt.AlignCenter
+            anchors {
+                left: parent.left
+                leftMargin: platformStyle.paddingLarge
+                right: parent.right
+                rightMargin: platformStyle.paddingLarge
+                verticalCenter: parent.verticalCenter
+            }
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
             color: platformStyle.reversedTextColor
         }
     }
 
     Loader {
         id: viewLoader
+        
+        anchors {
+            left: parent.left
+            leftMargin: platformStyle.paddingMedium
+            right: parent.right
+            rightMargin: platformStyle.paddingMedium
+            bottom: toolBar.top
+        }
+        height: item ? Math.min(item.count * 70, 280) : 0
     }
-
-    Loader {
-        id: loader
+    
+    QtObject {
+        id: dialogs
+        
+        property DownloadsDialog downloadsDialog
+        property SettingsDialog settingsDialog
+        property FileDialog fileDialog
+        property EditBookmarkDialog bookmarkDialog
+        property NewSearchEngineDialog searchEngineDialog
+        property AboutDialog aboutDialog
+        
+        function showDownloadsDialog() {
+            if (!downloadsDialog) {
+                downloadsDialog = downloadsDialogComponent.createObject(window)
+            }
+            
+            downloadsDialog.open();
+        }
+        
+        function showSettingsDialog() {
+            if (!settingsDialog) {
+                settingsDialog = settingsDialogComponent.createObject(window);
+            }
+            
+            settingsDialog.open();
+        }
+        
+        function showFileDialog() {
+            if (!fileDialog) {
+                fileDialog = fileDialogComponent.createObject(window);
+            }
+            
+            fileDialog.open();
+        }
+        
+        function showBookmarkDialog(name, address) {
+            if (!bookmarkDialog) {
+                bookmarkDialog = bookmarkDialogComponent.createObject(window);
+            }
+            
+            bookmarkDialog.name = name;
+            bookmarkDialog.address = address;
+            bookmarkDialog.open();
+        }
+        
+        function showSearchEngineDialog() {
+            if (!searchEngineDialog) {
+                searchEngineDialog = searchEngineDialogComponent.createObject(window);
+            }
+            
+            searchEngineDialog.open();
+        }
+        
+        function showAboutDialog() {
+            if (!aboutDialog) {
+                aboutDialog = aboutDialogComponent.createObject(window);
+            }
+            
+            aboutDialog.open();
+        }
     }
     
     Component {
@@ -195,43 +255,46 @@ Window {
     }
     
     Component {
-        id: downloadsDialog
+        id: downloadsDialogComponent
         
         DownloadsDialog {}
     }
     
     Component {
-        id: settingsDialog
+        id: settingsDialogComponent
         
         SettingsDialog {}
     }
     
     Component {
-        id: fileDialog
+        id: fileDialogComponent
         
-        OpenFileDialog {}
+        FileDialog {
+            onAccepted: window.loadBrowserWindow("file://" + filePath)
+        }
     }
     
     Component {
-        id: bookmarkDialog
+        id: bookmarkDialogComponent
         
         EditBookmarkDialog {}
     }
     
     Component {
-        id: deleteDialog
+        id: searchEngineDialogComponent
         
-        ConfirmBookmarkDeleteDialog {}
+        NewSearchEngineDialog {}
     }
     
     Component {
-        id: aboutDialog
+        id: aboutDialogComponent
         
         AboutDialog {}
     }
 
     Component.onCompleted: {
-        screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation : Screen.LandscapeOrientation);
+        screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Qt.WA_Maemo5AutoOrientation
+                                                                     : Qt.WA_Maemo5LandscapeOrientation);
 
         if (webHistory.count == 0) {
             webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";

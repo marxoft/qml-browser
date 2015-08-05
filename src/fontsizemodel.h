@@ -14,28 +14,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VOLUMEKEYS_H
-#define VOLUMEKEYS_H
+#ifndef FONTSIZEMODEL_H
+#define FONTSIZEMODEL_H
 
-#include <QObject>
-#include <QWidget>
+#include "selectionmodel.h"
 
-class VolumeKeys : public QObject
+class FontSizeModel : public SelectionModel
 {
     Q_OBJECT
-
-public:
-    explicit VolumeKeys(QObject *parent = 0);
-    ~VolumeKeys();
-
-public slots:
-    static bool grab(QObject *window);
-    static bool release(QObject *window);
     
-private:
-    static bool grabVolumeKeys(WId windowId, bool grab);
-
-    Q_DISABLE_COPY(VolumeKeys)
+public:
+    explicit FontSizeModel(QObject *parent = 0) :
+        SelectionModel(parent)
+    {
+        append(tr("Normal"), 16);
+        append(tr("Large"), 20);
+        append(tr("Very large"), 24);
+    }
 };
 
-#endif // VOLUMEKEYS_H
+#endif // FONTSIZEMODEL_H

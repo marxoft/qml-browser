@@ -1,28 +1,30 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "bookmarksmodel.h"
 #include "cache.h"
 #include "downloadmodel.h"
+#include "encodingmodel.h"
+#include "fontsizemodel.h"
 #include "launcher.h"
 #include "searchenginemodel.h"
 #include "settings.h"
 #include "utils.h"
 #include "volumekeys.h"
+#include <QWidget>
 #include <QApplication>
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
@@ -37,6 +39,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setOrganizationName("QMLBrowser");
     app.setApplicationName("QML Browser");
+    
+    qmlRegisterType<EncodingModel>("org.hildon.browser", 1, 0, "EncodingModel");
+    qmlRegisterType<FontSizeModel>("org.hildon.browser", 1, 0, "FontSizeModel");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
     qmlRegisterUncreatableType<Download>("org.hildon.browser", 1, 0, "Download", "");
@@ -94,7 +99,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
         }
     }
 
-    QDeclarativeComponent component(&engine, QUrl::fromLocalFile(QString("/opt/qml-browser/qml/%1.qml").arg(url.isEmpty() ? "main" : "main_browser")));
+    QDeclarativeComponent component(&engine, QUrl::fromLocalFile(QString("/opt/qml-browser/qml/%1.qml")
+                                                                        .arg(url.isEmpty() ? "main" : "main_browser")));
     QObject *obj = component.create();
 
     if (component.isError()) {
@@ -111,7 +117,16 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     if (!url.isEmpty()) {
         obj->setProperty("url", url);
-        obj->setProperty("fullScreen", (fullScreen) || (settings.openBrowserWindowsInFullScreen()));
+        
+        if (!fullScreen) {
+            fullScreen = settings.openBrowserWindowsInFullScreen();
+        }
+        
+        if (fullScreen) {
+            if (QWidget *w = qobject_cast<QWidget*>(obj)) {
+                w->showFullScreen();
+            }
+        }
     }
 
     QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));

@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "searchenginemodel.h"
@@ -29,14 +28,12 @@ SearchEngineModel::SearchEngineModel(QObject *parent) :
     roles[NameRole] = "name";
     roles[IconRole] = "icon";
     roles[UrlRole] = "url";
-    this->setRoleNames(roles);
+    setRoleNames(roles);
 }
 
 SearchEngineModel::~SearchEngineModel() {}
 
-int SearchEngineModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-
+int SearchEngineModel::rowCount(const QModelIndex &) const {
     return m_list.size();
 }
 
@@ -57,6 +54,10 @@ QVariant SearchEngineModel::data(const QModelIndex &index, int role) const {
     default:
         return QVariant();
     }
+}
+
+QVariant SearchEngineModel::data(int row, int role) const {
+    return data(index(row), role);
 }
 
 bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value, int role) {
@@ -86,31 +87,33 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
     return true;
 }
 
+bool SearchEngineModel::setData(int row, const QVariant &value, int role) {
+    return setData(index(row), value, role);
+}
+
 void SearchEngineModel::addSearchEngine(const QString &name, const QString &icon, const QString &url) {
     QSettings settings(FILE_NAME, QSettings::NativeFormat);
     settings.beginGroup(name);
     settings.setValue("icon", icon);
     settings.setValue("url", url);
     settings.endGroup();
-    this->load();
+    load();
 }
 
 void SearchEngineModel::removeSearchEngine(const QString &name) {
     for (int i = 0; i < m_list.size(); i++) {
         if (m_list.at(i).name == name) {
-            this->removeSearchEngine(this->index(i));
+            removeSearchEngine(i);
             return;
         }
     }
 }
 
-void SearchEngineModel::removeSearchEngine(const QModelIndex &index) {
-    const int row = index.row();
-
+void SearchEngineModel::removeSearchEngine(int row) {
     if ((row >= 0) && (row < m_list.size())) {
-        this->beginRemoveRows(QModelIndex(), row, row);
+        beginRemoveRows(QModelIndex(), row, row);
         QSettings(FILE_NAME, QSettings::NativeFormat).remove(m_list.takeAt(row).name);
-        this->endRemoveRows();
+        endRemoveRows();
         emit countChanged();
     }
 }
@@ -119,7 +122,7 @@ void SearchEngineModel::load() {
     QSettings settings(FILE_NAME, QSettings::NativeFormat);
     QDir dir(FILE_NAME.left(FILE_NAME.lastIndexOf('/')));
 
-    this->beginResetModel();
+    beginResetModel();
     m_list.clear();
 
     QStringList groups = settings.childGroups();
@@ -152,6 +155,6 @@ void SearchEngineModel::load() {
     se.icon = "/usr/share/icons/hicolor/48x48/hildon/general_add.png";
     m_list.append(se);
 
-    this->endResetModel();
+    endResetModel();
     emit countChanged();
 }

@@ -1,18 +1,17 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "downloadmodel.h"
@@ -26,7 +25,7 @@ static const QString FILE_NAME("/home/user/.config/QMLBrowser/downloads");
 static const int MAX_DOWNLOADS = 1;
 
 DownloadModel::DownloadModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractListModel(parent)
 {
     QHash<int, QByteArray> roles;
     roles[Qt::DisplayRole] = "display";
@@ -37,7 +36,7 @@ DownloadModel::DownloadModel(QObject *parent) :
     roles[IsRunningRole] = "running";
     roles[ErrorRole] = "error";
     roles[ErrorStringRole] = "errorString";
-    this->setRoleNames(roles);
+    setRoleNames(roles);
 }
 
 DownloadModel::~DownloadModel() {}
@@ -46,39 +45,18 @@ int DownloadModel::activeDownloads() const {
     return m_activeList.size();
 }
 
-int DownloadModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-
+int DownloadModel::rowCount(const QModelIndex &) const {
     return m_list.size();
 }
 
-int DownloadModel::columnCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-
-    return 3;
-}
-
 QVariant DownloadModel::data(const QModelIndex &index, int role) const {
-    Download *download = this->get(index);
+    Download *download = get(index.row());
 
     if (!download) {
         return QVariant();
     }
 
     switch (role) {
-    case Qt::DisplayRole:
-        switch (index.column()) {
-        case 0:
-            return download->fileName().section('/', -1);
-        case 1:
-            return download->size() > 0 ? Utils::fileSizeFromBytes(download->size()) : "-";
-        case 2:
-            return Utils::fileSizeFromBytes(download->bytesReceived());
-        default:
-            return QVariant();
-        }
-
-        return QVariant();
     case FileNameRole:
         return download->fileName();
     case NameRole:
@@ -100,9 +78,11 @@ QVariant DownloadModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-Download* DownloadModel::get(const QModelIndex &index) const {
-    const int row = index.row();
+QVariant DownloadModel::data(int row, int role) const {
+    return data(index(row), role);
+}
 
+Download* DownloadModel::get(int row) const {
     if ((row >= 0) && (row < m_list.size())) {
         return m_list.at(row);
     }
@@ -127,18 +107,18 @@ void DownloadModel::load() {
                                               settings.value("bytesReceived").toLongLong(),
                                               this);
 
-            this->connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
-            this->connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
-            this->connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
-            this->connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
-            this->connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
-            this->connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
-            this->connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
-            this->connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
-            this->connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
-            this->beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
+            connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
+            connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
+            connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
+            connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
+            connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
+            connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
+            connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
+            connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
+            connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
+            beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
             m_list.append(download);
-            this->endInsertRows();
+            endInsertRows();
             emit countChanged();
             qDebug() << "Download added:" << url.toString() << fileName;
         }
@@ -149,7 +129,7 @@ void DownloadModel::load() {
         settings.endGroup();
     }
 
-    this->startNextDownload();
+    startNextDownload();
 }
 
 void DownloadModel::save() {
@@ -173,29 +153,29 @@ void DownloadModel::addDownload(const QUrl &url, const QVariantMap &headers, con
     download->setUrl(url);
     download->setHeaders(headers);
     download->setFileName(fileName);
-    this->connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
-    this->connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
-    this->connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
-    this->connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
-    this->connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
-    this->connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
-    this->connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
-    this->connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
-    this->connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
-    this->beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
+    connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
+    connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
+    connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
+    connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
+    connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
+    connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
+    connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
+    connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
+    connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
+    beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
     m_list.append(download);
-    this->endInsertRows();
+    endInsertRows();
     emit countChanged();
     QMaemo5InformationBox::information(0, tr("Download '%1' added").arg(fileName.section('/', -1)));
     qDebug() << "Download added:" << url.toString() << fileName;
-    this->startNextDownload();
+    startNextDownload();
 }
 
 void DownloadModel::removeDownload(Download *download) {
     const int row = m_list.indexOf(download);
-    this->beginRemoveRows(QModelIndex(), row, row);
+    beginRemoveRows(QModelIndex(), row, row);
     m_list.removeAt(row);
-    this->endInsertRows();
+    endRemoveRows();
     emit countChanged();
     qDebug() << "Download removed:" << download->url().toString() << download->fileName();
     download->deleteLater();
@@ -220,24 +200,24 @@ void DownloadModel::onDownloadQueued(Download *download) {
 
 void DownloadModel::onDownloadStarted(Download *download) {
     const int row = m_list.indexOf(download);
-    emit dataChanged(this->index(row, 0), this->index(row, 2));
+    emit dataChanged(index(row, 0), index(row, 2));
     m_activeList.append(download);
     emit activeDownloadsChanged();
 }
 
 void DownloadModel::onDownloadPaused(Download *download) {
     const int row = m_list.indexOf(download);
-    emit dataChanged(this->index(row, 0), this->index(row, 2));
+    emit dataChanged(index(row, 0), index(row, 2));
     m_activeList.removeOne(download);
     emit activeDownloadsChanged();
-    this->startNextDownload();
+    startNextDownload();
 }
 
 void DownloadModel::onDownloadCanceled(Download *download) {
     m_activeList.removeOne(download);
     emit activeDownloadsChanged();
-    this->removeDownload(download);
-    this->startNextDownload();
+    removeDownload(download);
+    startNextDownload();
 }
 
 void DownloadModel::onDownloadFinished(Download *download) {
@@ -248,7 +228,7 @@ void DownloadModel::onDownloadFinished(Download *download) {
     case Download::NoError:
         QMaemo5InformationBox::information(0, tr("Downloading of '%1' completed").arg(download->fileName().section('/', -1)));
         qDebug() << "Download completed:" << download->url().toString() << download->errorString();
-        this->removeDownload(download);
+        removeDownload(download);
         break;
     default:
         QMaemo5InformationBox::information(0, tr("Downloading of '%1' failed.\nReason: %2").arg(download->fileName().section('/', -1)).arg(download->errorString()),
@@ -257,12 +237,12 @@ void DownloadModel::onDownloadFinished(Download *download) {
         break;
     }
 
-    this->startNextDownload();
+    startNextDownload();
 }
 
 void DownloadModel::onDownloadDataChanged() {
-    if (Download *download = qobject_cast<Download*>(this->sender())) {
+    if (Download *download = qobject_cast<Download*>(sender())) {
         const int row = m_list.indexOf(download);
-        emit dataChanged(this->index(row, 0), this->index(row, 2));
+        emit dataChanged(index(row, 0), index(row, 2));
     }
 }

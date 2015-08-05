@@ -88,7 +88,7 @@ QString Launcher::handler(const QString &url) const {
 }
 
 bool Launcher::canLaunch(const QString &url) const {
-    return !this->handler(url).isEmpty();
+    return !handler(url).isEmpty();
 }
 
 bool Launcher::launch(const QString &url) {
@@ -97,7 +97,7 @@ bool Launcher::launch(const QString &url) {
             QString command = QString(handler.command).replace("%URL%", url);
             qDebug() << "Launching" << url << "with command" << command;
             QProcess *process = new QProcess(this);
-            this->connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
+            connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
             process->start(command);
             return true;
         }

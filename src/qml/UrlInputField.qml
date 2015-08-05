@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 import org.hildon.browser 1.0
 
@@ -44,7 +44,8 @@ TextField {
         if (url.indexOf(":") < 0) {
             if ((url.indexOf(".") < 0) || (url.indexOf(" ") >= 0)) {
                 if (searchEngines.count > 1) {
-                    return searchEngines.data(0, SearchEngineModel.UrlRole).toString().replace(/%QUERY%/ig, url.replace(/\s+/g, "+"));
+                    return searchEngines.data(0, SearchEngineModel.UrlRole).toString()
+                                             .replace(/%QUERY%/ig, url.replace(/\s+/g, "+"));
                 }
 
                 return "https://duckduckgo.com?q=" + url.replace(/\s+/g, "+");
@@ -59,7 +60,9 @@ TextField {
 
     height: parent.height
     inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-    rightMargin: 50
+    style: TextFieldStyle {
+        paddingRight: 70
+    }
 
     Image {
         id: combobox
@@ -76,10 +79,10 @@ TextField {
         MouseArea {
             id: mouseArea
 
+            z: 1000
             width: 60
             height: 70
             anchors.centerIn: parent
-            preventStealing: true
             onClicked: root.comboboxTriggered()
         }
     }

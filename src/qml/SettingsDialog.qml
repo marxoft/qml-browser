@@ -1,32 +1,42 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQuick 1.0
 import org.hildon.components 1.0
 import org.hildon.webkit 1.0
+import org.hildon.browser 1.0
 
 Dialog {
     id: root
 
-    height: window.inPortrait ? 680 : 360
-    windowTitle: qsTr("Settings")
-    content: Flickable {
+    height: column.height + platformStyle.paddingMedium
+    title: qsTr("Settings")
+    
+    Flickable {
         id: flicker
 
-        anchors.fill: parent
+        anchors {
+            left: parent.left
+            right: acceptButton.left
+            rightMargin: platformStyle.paddingMedium
+            top: parent.top
+            bottom: parent.bottom
+        }
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+        contentHeight: column.height
 
         Column {
             id: column
@@ -36,14 +46,17 @@ Dialog {
                 right: parent.right
                 top: parent.top
             }
+            spacing: platformStyle.paddingMedium
 
             Label {
+                width: parent.width
                 text: qsTr("General")
             }
 
             CheckBox {
                 id: rotationCheckbox
 
+                width: parent.width
                 text: qsTr("Enable rotation")
                 checked: qmlBrowserSettings.rotationEnabled
             }
@@ -51,6 +64,7 @@ Dialog {
             CheckBox {
                 id: volumeKeysCheckbox
 
+                width: parent.width
                 text: qsTr("Use volume keys to zoom")
                 checked: qmlBrowserSettings.zoomWithVolumeKeys
             }
@@ -58,37 +72,40 @@ Dialog {
             CheckBox {
                 id: fullScreenCheckbox
 
+                width: parent.width
                 text: qsTr("Open browser windows in fullscreen")
                 checked: qmlBrowserSettings.openBrowserWindowsInFullScreen
             }
 
             CheckBox {
                 id: forceToolbarCheckbox
-
+                
+                width: parent.width
                 text: qsTr("ToolBar always visible when loading")
                 checked: qmlBrowserSettings.forceToolBarVisibleWhenLoading
             }
 
             CheckBox {
                 id: handlersCheckbox
-
+                
+                width: parent.width
                 text: qsTr("Use custom URL handlers")
                 checked: qmlBrowserSettings.useCustomURLHandlers
             }
 
             Button {
+                width: parent.width
                 text: qsTr("Add custom URL handler")
-                onClicked: {
-                    loader.sourceComponent = handlerDialog;
-                    loader.item.open();
-                }
+                onClicked: dialogs.showHandlerDialog()
             }
 
             Label {
+                width: parent.width
                 text: qsTr("Content")
             }
 
             Button {
+                width: parent.width
                 text: qsTr("Clear browsing history")
                 enabled: webHistory.count > 0
                 onClicked: {
@@ -100,6 +117,7 @@ Dialog {
             CheckBox {
                 id: privateCheckbox
 
+                width: parent.width
                 text: qsTr("Enable private browsing")
                 checked: qmlBrowserSettings.privateBrowsingEnabled
             }
@@ -107,6 +125,7 @@ Dialog {
             CheckBox {
                 id: imagesCheckbox
 
+                width: parent.width
                 text: qsTr("Load images automatically")
                 checked: qmlBrowserSettings.autoLoadImages
             }
@@ -114,6 +133,7 @@ Dialog {
             CheckBox {
                 id: jsCheckbox
 
+                width: parent.width
                 text: qsTr("Enable JavaScript")
                 checked: qmlBrowserSettings.javaScriptEnabled
             }
@@ -121,6 +141,7 @@ Dialog {
             CheckBox {
                 id: zoomTextCheckbox
 
+                width: parent.width
                 text: qsTr("Apply zoom to text only")
                 checked: qmlBrowserSettings.zoomTextOnly
             }
@@ -128,94 +149,101 @@ Dialog {
             ValueButton {
                 id: fontButton
 
+                width: parent.width
                 text: qsTr("Text size")
-                valueText: fontSelector.sizes[fontSelector.currentIndex].display
-                selector: ListSelector {
-                    id: fontSelector
-
-                    property variant sizes: [
-                        { "display": qsTr("Normal"), "value": 16 },
-                        { "display": qsTr("Large"), "value": 20 },
-                        { "display": qsTr("Very large"), "value": 24 }
-                    ]
-
-                    function indexOf(value) {
-                        for (var i = 0; i < sizes.length; i++) {
-                            if (sizes[i].value === value) {
-                                return i;
-                            }
-                        }
-
-                        return 0;
-                    }
-
-                    model: sizes
-                    currentIndex: indexOf(qmlBrowserSettings.defaultFontSize)
-                }
+                pickSelector: fontSelector
             }
 
             ValueButton {
                 id: encodingButton
 
+                width: parent.width
                 text: qsTr("Encoding")
-                valueText: encodingSelector.encodings[encodingSelector.currentIndex].display
-                selector: ListSelector {
-                    id: encodingSelector
-
-                    property variant encodings: [
-                        { "display": qsTr("Central European") + " (ISO 8859-2)", "value": "ISO 8859-2" },
-                        { "display": qsTr("Central European") + " (Windows-1250)", "value": "Windows-1250" },
-                        { "display": qsTr("Chinese, Simplified") + " (GB18030)", "value": "GB18030" },
-                        { "display": qsTr("Chinese, Simplified") + " (ISO-2022-CN)", "value": "ISO-2022-CN" },
-                        { "display": qsTr("Chinese, Traditional") + " (Big5 I/II)", "value": "Big5" },
-                        { "display": qsTr("Chinese, Traditional") + " (EUC-TW)", "value": "EUC-TW" },
-                        { "display": qsTr("Cyrillic") + " (KOI-8R)", "value": "KOI-8R" },
-                        { "display": qsTr("Cryillic") + " (Windows-1251)", "value": "Windows-1251" },
-                        { "display": qsTr("Greek") + " (ISO 8859-7)", "value": "ISO 8859-7" },
-                        { "display": qsTr("Greek") + " (Windows-1253)", "value": "Windows-1253" },
-                        { "display": qsTr("Latin") + " (ISO 8859-1)", "value": "ISO 8859-1" },
-                        { "display": qsTr("Latin extended") + " (ISO 8859-15)", "value": "ISO 8859-15" },
-                        { "display": qsTr("Turkish") + " (ISO 8859-9)", "value": "ISO 8859-9" },
-                        { "display": qsTr("Turkish") + " (Windows-1254)", "value": "Windows-1254" },
-                        { "display": qsTr("Unicode") + " (UTF-16)", "value": "UTF-16" },
-                        { "display": qsTr("Unicode") + " (UTF-8)", "value": "UTF-8" }
-                    ]
-
-                    function indexOf(value) {
-                        for (var i = 0; i < encodings.length; i++) {
-                            if (encodings[i].value === value) {
-                                return i;
-                            }
-                        }
-
-                        return 0;
-                    }
-
-                    model: encodings
-                    currentIndex: indexOf(qmlBrowserSettings.defaultTextEncoding)
-                }
+                pickSelector: encodingSelector
             }
 
             Label {
+                width: parent.width
                 text: qsTr("User-Agent string")
             }
 
             TextField {
                 id: userAgentInput
 
+                width: parent.width
                 text: qmlBrowserSettings.userAgentString
             }
         }
     }
-
-    buttons: Button {
+    
+    Button {
+        id: acceptButton
+        
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
         text: qsTr("Save")
         onClicked: root.accept()
     }
+    
+    ListPickSelector {
+        id: fontSelector
+        
+        model: FontSizeModel {
+            id: fontSizeModel
+        }
+        textRole: "name"
+        currentIndex: fontSizeModel.match("value", qmlBrowserSettings.defaultFontSize)
+    }
+    
+    ListPickSelector {
+        id: encodingSelector
+        
+        model: EncodingModel {
+            id: encodingModel
+        }
+        textRole: "name"
+        currentIndex: encodingModel.match("value", qmlBrowserSettings.defaultTextEncoding)
+    }
+    
+    StateGroup {
+        states: State {
+            name: "Portrait"
+            when: screen.currentOrientation == Qt.WA_Maemo5PortraitOrientation
+            
+            PropertyChanges {
+                target: root
+                height: column.height + acceptButton.height + platformStyle.paddingMedium
+            }
+        
+            AnchorChanges {
+                target: flicker
+                anchors {
+                    right: parent.right
+                    bottom: button.top
+                }
+            }
+        
+            PropertyChanges {
+                target: flicker
+                anchors {
+                    rightMargin: 0
+                    bottomMargin: platformStyle.paddingMedium
+                }
+            }
+        
+            PropertyChanges {
+                target: acceptButton
+                width: parent.width
+            }
+        }
+    }
 
-    onVisibleChanged: if (visible) flicker.contentY = 0;
+    onStatusChanged: if (status == DialogStatus.Open) flicker.contentY = 0;
     onAccepted: {
-        screen.orientationLock = (rotationCheckbox.checked ? Screen.AutoOrientation : Screen.LandscapeOrientation);
+        screen.orientationLock = (rotationCheckbox.checked ? Qt.WA_Maemo5AutoOrientation
+                                                           : Qt.WA_Maemo5LandscapeOrientation);
 
         if (volumeKeysCheckbox.checked != qmlBrowserSettings.zoomWithVolumeKeys) {
             if (window) {
@@ -237,8 +265,8 @@ Dialog {
         qmlBrowserSettings.autoLoadImages = imagesCheckbox.checked;
         qmlBrowserSettings.javaScriptEnabled = jsCheckbox.checked;
         qmlBrowserSettings.zoomTextOnly = zoomTextCheckbox.checked;
-        qmlBrowserSettings.defaultFontSize = fontSelector.sizes[fontSelector.currentIndex].value;
-        qmlBrowserSettings.defaultTextEncoding = encodingSelector.encodings[encodingSelector.currentIndex].value;
+        qmlBrowserSettings.defaultFontSize = fontSizeModel.data(fontSelector.currentIndex, "value");
+        qmlBrowserSettings.defaultTextEncoding = encodingModel.data(encodingSelector.currentIndex, "value");
         qmlBrowserSettings.userAgentString = userAgentInput.text;
     }
     onRejected: {
@@ -251,17 +279,27 @@ Dialog {
         imagesCheckbox.checked = qmlBrowserSettings.autoLoadImages;
         jsCheckbox.checked = qmlBrowserSettings.javaScriptEnabled;
         zoomTextCheckbox.checked = qmlBrowserSettings.zoomTextOnly;
-        fontSelector.currentIndex = fontSelector.indexOf(qmlBrowserSettings.defaultFontSize);
-        encodingSelector.currentIndex = encodingSelector.indexOf(qmlBrowserSettings.defaultTextEncoding);
+        fontSelector.currentIndex = fontSizeModel.match("value", qmlBrowserSettings.defaultFontSize);
+        encodingSelector.currentIndex = encodingModel.match("value", qmlBrowserSettings.defaultTextEncoding);
         userAgentInput.text = qmlBrowserSettings.userAgentString;
     }
 
-    Loader {
-        id: loader
+    QtObject {
+        id: dialogs
+        
+        property NewUrlHandlerDialog handlerDialog
+        
+        function showHandlerDialog() {
+            if (!handlerDialog) {
+                handlerDialog = handlerDialogComponent.createObject(root);
+            }
+            
+            handlerDialog.open();
+        }
     }
     
     Component {
-        id: handlerDialog
+        id: handlerDialogComponent
         
         NewUrlHandlerDialog {}
     }

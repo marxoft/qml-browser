@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "settings.h"
 
 Settings::Settings(QObject *parent) :
@@ -25,133 +23,133 @@ Settings::Settings(QObject *parent) :
 Settings::~Settings() {}
 
 bool Settings::forceToolBarVisibleWhenLoading() const {
-    return this->value("forceToolBarVisibleWhenLoading", true).toBool();
+    return value("forceToolBarVisibleWhenLoading", true).toBool();
 }
 
 void Settings::setForceToolBarVisibleWhenLoading(bool force) {
-    if (force != this->forceToolBarVisibleWhenLoading()) {
-        this->setValue("forceToolBarVisibleWhenLoading", force);
+    if (force != forceToolBarVisibleWhenLoading()) {
+        setValue("forceToolBarVisibleWhenLoading", force);
         emit forceToolBarVisibleWhenLoadingChanged();
     }
 }
 
 bool Settings::openBrowserWindowsInFullScreen() const {
-    return this->value("openBrowserWindowsInFullScreen", false).toBool();
+    return value("openBrowserWindowsInFullScreen", false).toBool();
 }
 
 void Settings::setOpenBrowserWindowsInFullScreen(bool fullScreen) {
-    if (fullScreen != this->openBrowserWindowsInFullScreen()) {
-        this->setValue("openBrowserWindowsInFullScreen", fullScreen);
+    if (fullScreen != openBrowserWindowsInFullScreen()) {
+        setValue("openBrowserWindowsInFullScreen", fullScreen);
         emit openBrowserWindowsInFullScreenChanged();
     }
 }
 
 bool Settings::rotationEnabled() const {
-    return this->value("rotationEnabled", false).toBool();
+    return value("rotationEnabled", false).toBool();
 }
 
 void Settings::setRotationEnabled(bool enabled) {
-    if (enabled != this->rotationEnabled()) {
-        this->setValue("rotationEnabled", enabled);
+    if (enabled != rotationEnabled()) {
+        setValue("rotationEnabled", enabled);
         emit rotationEnabledChanged();
     }
 }
 
 bool Settings::zoomWithVolumeKeys() const {
-    return this->value("zoomWithVolumeKeys", false).toBool();
+    return value("zoomWithVolumeKeys", false).toBool();
 }
 
 void Settings::setZoomWithVolumeKeys(bool zoom) {
-    if (zoom != this->zoomWithVolumeKeys()) {
-        this->setValue("zoomWithVolumeKeys", zoom);
+    if (zoom != zoomWithVolumeKeys()) {
+        setValue("zoomWithVolumeKeys", zoom);
         emit zoomWithVolumeKeysChanged();
     }
 }
 
 bool Settings::useCustomURLHandlers() const {
-    return this->value("useCustomURLHandlers", true).toBool();
+    return value("useCustomURLHandlers", true).toBool();
 }
 
 void Settings::setUseCustomURLHandlers(bool use) {
-    if (use != this->useCustomURLHandlers()) {
-        this->setValue("useCustomURLHandlers", use);
+    if (use != useCustomURLHandlers()) {
+        setValue("useCustomURLHandlers", use);
         emit useCustomURLHandlersChanged();
     }
 }
 
 bool Settings::privateBrowsingEnabled() const {
-    return this->value("Content/privateBrowsingEnabled", false).toBool();
+    return value("Content/privateBrowsingEnabled", false).toBool();
 }
 
 void Settings::setPrivateBrowsingEnabled(bool enabled) {
-    if (enabled != this->privateBrowsingEnabled()) {
-        this->setValue("Content/privateBrowsingEnabled", enabled);
+    if (enabled != privateBrowsingEnabled()) {
+        setValue("Content/privateBrowsingEnabled", enabled);
         emit privateBrowsingEnabledChanged();
     }
 }
 
 bool Settings::autoLoadImages() const {
-    return this->value("Content/autoLoadImages", true).toBool();
+    return value("Content/autoLoadImages", true).toBool();
 }
 
 void Settings::setAutoLoadImages(bool load) {
-    if (load != this->autoLoadImages()) {
-        this->setValue("Content/autoLoadImages", load);
+    if (load != autoLoadImages()) {
+        setValue("Content/autoLoadImages", load);
         emit autoLoadImagesChanged();
     }
 }
 
 bool Settings::javaScriptEnabled() const {
-    return this->value("Content/javaScriptEnabled", true).toBool();
+    return value("Content/javaScriptEnabled", true).toBool();
 }
 
 void Settings::setJavaScriptEnabled(bool enabled) {
-    if (enabled != this->javaScriptEnabled()) {
-        this->setValue("Content/javaScriptEnabled", enabled);
+    if (enabled != javaScriptEnabled()) {
+        setValue("Content/javaScriptEnabled", enabled);
         emit javaScriptEnabledChanged();
     }
 }
 
 bool Settings::zoomTextOnly() const {
-    return this->value("Content/zoomTextOnly", false).toBool();
+    return value("Content/zoomTextOnly", false).toBool();
 }
 
 void Settings::setZoomTextOnly(bool textOnly) {
-    if (textOnly != this->zoomTextOnly()) {
-        this->setValue("Content/zoomTextOnly", textOnly);
+    if (textOnly != zoomTextOnly()) {
+        setValue("Content/zoomTextOnly", textOnly);
         emit zoomTextOnlyChanged();
     }
 }
 
 int Settings::defaultFontSize() const {
-    return this->value("Content/defaultFontSize", 16).toInt();
+    return value("Content/defaultFontSize", 16).toInt();
 }
 
 void Settings::setDefaultFontSize(int size) {
-    if (size != this->defaultFontSize()) {
-        this->setValue("Content/defaultFontSize", size);
+    if (size != defaultFontSize()) {
+        setValue("Content/defaultFontSize", size);
         emit defaultFontSizeChanged();
     }
 }
 
 QString Settings::defaultTextEncoding() const {
-    return this->value("Content/defaultTextEncoding", "UTF-8").toString();
+    return value("Content/defaultTextEncoding", "UTF-8").toString();
 }
 
 void Settings::setDefaultTextEncoding(const QString &encoding) {
-    if (encoding != this->defaultTextEncoding()) {
-        this->setValue("Content/defaultTextEncoding", encoding);
+    if (encoding != defaultTextEncoding()) {
+        setValue("Content/defaultTextEncoding", encoding);
         emit defaultTextEncodingChanged();
     }
 }
 
 QString Settings::userAgentString() const {
-    return this->value("Content/userAgentString").toString();
+    return value("Content/userAgentString").toString();
 }
 
 void Settings::setUserAgentString(const QString &agent) {
-    if (agent != this->userAgentString()) {
-        this->setValue("Content/userAgentString", agent);
+    if (agent != userAgentString()) {
+        setValue("Content/userAgentString", agent);
         emit userAgentStringChanged();
     }
 }

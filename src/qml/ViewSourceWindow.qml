@@ -17,42 +17,18 @@
 import QtQuick 1.0
 import org.hildon.components 1.0
 
-Item {
+Window {
     id: root
 
-    property bool panningOn: false
+    property alias source: textArea.text
 
-    signal clicked
+    TextArea {
+        id: textArea
 
-    width: 64
-    height: 64
-    anchors {
-        left: parent.left
-        verticalCenter: parent.verticalCenter
-    }
-
-    Rectangle {
-        x: -10
-        width: 74
-        height: 64
-        color: "black"
-        opacity: 0.5
-        radius: 10
-        smooth: true
-    }
-
-    Image {
-        id: icon
-
-        width: 64
-        height: 64
-        anchors.centerIn: parent
-        source: "image://icon/browser_panning_mode_" + (root.panningOn ? "on" : "off")
-        smooth: true
-    }
-
-    MouseArea {
         anchors.fill: parent
-        onClicked: root.clicked()
+        readOnly: true
+        wrapMode: TextEdit.NoWrap
+        textFormat: Text.PlainText
+        font.pixelSize: qmlBrowserSettings.defaultFontSize
     }
 }
