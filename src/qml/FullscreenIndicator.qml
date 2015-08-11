@@ -57,7 +57,7 @@ Item {
         property bool timedOut: false
 
         interval: 2000
-        running: (!toolBar.visible) && (!flicker.moving) && (!flicker.atYBeginning) && (webView.status == WebView.Loading)
+        running: (!toolBar.visible) && (!flicker.moving) && (!flicker.atYBeginning) && (webView.status != WebView.Loading)
         onRunningChanged: if (running) timedOut = false;
         onTriggered: timedOut = true
     }
