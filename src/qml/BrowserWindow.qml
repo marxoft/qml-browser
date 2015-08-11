@@ -128,7 +128,7 @@ ApplicationWindow {
             }
             newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
             forwardUnsupportedContent: true
-            linkDelegationPolicy: WebView.DelegateAllLinks
+            linkDelegationPolicy: WebPage.DelegateAllLinks
             onUrlChanged: {
                 urlInput.text = url;
                 urlInput.cursorPosition = 0;
