@@ -128,7 +128,7 @@ ApplicationWindow {
             }
             newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
             forwardUnsupportedContent: true
-            linkDelegationPolicy: WebView.DelegateAllLinks
+            linkDelegationPolicy: WebPage.DelegateAllLinks
             onUrlChanged: {
                 urlInput.text = url;
                 urlInput.cursorPosition = 0;
@@ -580,8 +580,8 @@ ApplicationWindow {
     }
     
     Component.onCompleted: {
-        screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Screen.AutoOrientation
-                                                                     : Screen.LandscapeOrientation);
+        screen.orientationLock = (qmlBrowserSettings.rotationEnabled ? Qt.WA_Maemo5AutoOrientation
+                                                                     : Qt.WA_Maemo5LandscapeOrientation);
 
         if (qmlBrowserSettings.zoomWithVolumeKeys) {
             volumeKeys.grab(window);
