@@ -28,52 +28,9 @@ Dialog {
         id: view
 
         anchors.fill: parent
-        model: root.status == DialogStatus.Open ? downloads : null
-        delegate: ListItem {    
-            Label {
-                id: nameLabel
-        
-                anchors {
-                    left: parent.left
-                    right: progressBar.left
-                    top: parent.top
-                    margins: platformStyle.paddingMedium
-                }
-                elide: Text.ElideRight
-                text: name
-            }
-    
-            Label {
-                id: sizeLabel
-                anchors {
-                    left: parent.left
-                    right: progressBar.left
-                    bottom: parent.bottom
-                    margins: platformStyle.paddingMedium
-                }
-                elide: Text.ElideRight
-                color: error == Download.NoError ? platformStyle.secondaryTextColor : platformStyle.attentionColor
-                font.pointSize: platformStyle.fontSizeSmall
-                text: error == Download.NoError ? (running ? qsTr("Downloading") : qsTr("Waiting")) + ": "
-                                                   + qmlBrowserUtils.fileSizeFromBytes(bytesReceived) + " / "
-                                                   + qmlBrowserUtils.fileSizeFromBytes(size)
-                                                : qsTr("Failed")
-            }
-    
-            ProgressBar {
-                id: progressBar
-        
-                anchors {
-                    right: parent.right
-                    rightMargin: platformStyle.paddingMedium
-                    verticalCenter: parent.verticalCenter
-                }
-                width: 150
-                textVisible: true
-                text: progress + "%"
-            }
-            
-            onPressAndHold: contextMenu.popup()
+        model: downloads
+        delegate: DownloadDelegate {
+            onPressAndHold: popupManager.open(contextMenu, root)
         }
     }
     
@@ -86,18 +43,20 @@ Dialog {
         visible: downloads.count == 0
     }
     
-    Menu {
+    Component {
         id: contextMenu
         
-        MenuItem {
-            text: downloads.data(view.currentIndex, DownloadModel.IsRunningRole) === true ? qsTr("Pause")
-                                                                                          : qsTr("Resume")
-            onTriggered: downloads.get(view.currentIndex).pause()
-        }
-
-        MenuItem {
-            text: qsTr("Delete")
-            onTriggered: downloads.get(view.currentIndex).cancel()
+        Menu {            
+            MenuItem {
+                text: downloads.data(view.currentIndex, DownloadModel.IsRunningRole) === true ? qsTr("Pause")
+                : qsTr("Resume")
+                onTriggered: downloads.get(view.currentIndex).pause()
+            }
+            
+            MenuItem {
+                text: qsTr("Delete")
+                onTriggered: downloads.get(view.currentIndex).cancel()
+            }
         }
     }
 }

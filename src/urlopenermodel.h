@@ -14,32 +14,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef URLOPENERMODEL_H
+#define URLOPENERMODEL_H
 
-#include <QObject>
-#include <QUrl>
+#include "selectionmodel.h"
 
-class Utils : public QObject
+class EnclosureRequest;
+
+class UrlOpenerModel : public SelectionModel
 {
     Q_OBJECT
-        
-public:
-    explicit Utils(QObject *parent = 0);
-        
-    Q_INVOKABLE static QString createId();
-        
-    Q_INVOKABLE static QString formatBytes(qint64 bytes);
-        
-    Q_INVOKABLE static QString formatMSecs(qint64 ms);
-    Q_INVOKABLE static QString formatSecs(qint64 s);
     
-    Q_INVOKABLE static QString getSanitizedFileName(const QString &fileName);
+public:
+    explicit UrlOpenerModel(QObject *parent = 0);
+    ~UrlOpenerModel();
+    
+    Q_INVOKABLE void append(const QString &regExp, const QVariant &command);
+    Q_INVOKABLE void insert(int row, const QString &regExp, const QVariant &command);
+        
+public Q_SLOTS:    
+    bool open(const QString &url);
+    
+    void load();
+    void save();
 
-    Q_INVOKABLE static bool isLocalFile(const QUrl &url);
-
-private:
-    Q_DISABLE_COPY(Utils)
+private:    
+    Q_DISABLE_COPY(UrlOpenerModel)
 };
 
-#endif // UTILS_H
+#endif // URLOPENERMODEL_H

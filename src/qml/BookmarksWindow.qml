@@ -32,27 +32,13 @@ Window {
         model: bookmarks
         delegate: BookmarkDelegate {
             onClicked: {
-                window.url = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
+                window.url = url;
                 windowStack.pop(window);
             }
-            onPressAndHold: contextMenu.popup()
+            onPressAndHold: popupManager.open(contextMenu, root)
         }
     }
     
-    Menu {
-        id: contextMenu
-        
-        MenuItem {
-            text: qsTr("Edit")
-            onTriggered: dialogs.showEditDialog()
-        }
-
-        MenuItem {
-            text: qsTr("Delete")
-            onTriggered: bookmarks.removeBookmark(view.currentIndex)
-        }
-    }
-
     Label {
         anchors {
             fill: parent
@@ -64,26 +50,22 @@ Window {
         text: qsTr("(No bookmarks)")
         visible: bookmarks.count === 0
     }
-
-    QtObject {
-        id: dialogs
-        
-        property EditBookmarkDialog editDialog
-        
-        function showEditDialog() {
-            if (!editDialog) {
-                editDialog = editDialogComponent.createObject(root);
-            }
-            
-            editDialog.name = bookmarks.data(view.currentIndex, BookmarksModel.TitleRole);
-            editDialog.address = bookmarks.data(view.currentIndex, BookmarksModel.UrlRole);
-            editDialog.open();
-        }
-    }
     
     Component {
-        id: editDialogComponent
+        id: contextMenu
         
-        EditBookmarkDialog {}
+        Menu {            
+            MenuItem {
+                text: qsTr("Edit")
+                onTriggered: popupManager.open(Qt.resolvedUrl("EditBookmarkDialog.qml"), root,
+                {name: bookmarks.data(view.currentIndex, BookmarksModel.TitleRole),
+                 address: bookmarks.data(view.currentIndex, BookmarksModel.UrlRole)})
+            }
+            
+            MenuItem {
+                text: qsTr("Delete")
+                onTriggered: bookmarks.removeBookmark(view.currentIndex)
+            }
+        }
     }
 }

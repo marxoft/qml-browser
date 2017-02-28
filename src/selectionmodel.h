@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2016 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -24,54 +24,46 @@ class SelectionModel : public QAbstractListModel
     Q_OBJECT
     
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
-    Q_PROPERTY(Qt::Alignment textAlignment READ textAlignment WRITE setTextAlignment NOTIFY textAlignmentChanged)
     
+    Q_ENUMS(Roles)
+        
 public:
     enum Roles {
-        NameRole = Qt::DisplayRole,
+        NameRole = Qt::UserRole + 1,
         ValueRole = Qt::UserRole
     };
     
     explicit SelectionModel(QObject *parent = 0);
-        
-#if QT_VERSION >= 0x050000
-    QHash<int, QByteArray> roleNames() const;
-#endif
     
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    
-    Qt::Alignment textAlignment() const;
-    void setTextAlignment(Qt::Alignment align);
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     
     QVariant data(const QModelIndex &index, int role = NameRole) const;
     QMap<int, QVariant> itemData(const QModelIndex &index) const;
     bool setData(const QModelIndex &index, const QVariant &value, int role);
     bool setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles);
     
-    Q_INVOKABLE QVariant data(int row, const QByteArray &role) const;
-    Q_INVOKABLE QVariantMap itemData(int row) const;
-    Q_INVOKABLE bool setData(int row, const QVariant &value, const QByteArray &role);
-    Q_INVOKABLE bool setItemData(int row, const QVariantMap &roles);
+    Q_INVOKABLE virtual QVariant data(int row, int role) const;
+    Q_INVOKABLE virtual QVariantMap itemData(int row) const;
+    Q_INVOKABLE virtual bool setData(int row, const QVariant &value, int role);
+    Q_INVOKABLE virtual bool setItemData(int row, const QVariantMap &roles);
     
-    Q_INVOKABLE int match(const QByteArray &role, const QVariant &value) const;
+    QModelIndexList match(const QModelIndex &start, int role, const QVariant &value, int hits = 1,
+                          Qt::MatchFlags flags = Qt::MatchFlags(Qt::MatchExactly | Qt::MatchWrap)) const;
+    Q_INVOKABLE virtual int match(int start, int role, const QVariant &value,
+                                  int flags = Qt::MatchFlags(Qt::MatchExactly | Qt::MatchWrap)) const;
     
-    Q_INVOKABLE void append(const QString &name, const QVariant &value);
-    Q_INVOKABLE void insert(int row, const QString &name, const QVariant &value);
-    Q_INVOKABLE bool remove(int row);
+    Q_INVOKABLE virtual void append(const QString &name, const QVariant &value);
+    Q_INVOKABLE virtual void insert(int row, const QString &name, const QVariant &value);
+    Q_INVOKABLE virtual bool remove(int row);
 
 public Q_SLOTS:
     void clear();
     
 Q_SIGNALS:
-    void countChanged(int c);
-    void textAlignmentChanged();
+    void countChanged(int count);
     
 protected:
     QList< QPair<QString, QVariant> > m_items;
-    
-    QHash<int, QByteArray> m_roles;
-    
-    Qt::Alignment m_alignment;
 };
 
 #endif // SELECTIONMODEL_H

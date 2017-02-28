@@ -16,43 +16,36 @@
 
 import QtQuick 1.0
 import org.hildon.components 1.0
+import org.hildon.browser 1.0
 
-Item {
+Window {
     id: root
 
-    property bool panningOn: false
+    title: qsTr("Browsing history")
 
-    signal clicked
+    ListView {
+        id: view
 
-    width: 64
-    height: 64
-    anchors {
-        left: parent.left
-        verticalCenter: parent.verticalCenter
-    }
-
-    Rectangle {
-        x: -10
-        width: 74
-        height: 64
-        color: "black"
-        opacity: 0.5
-        radius: 10
-        smooth: true
-    }
-
-    Image {
-        id: icon
-
-        width: 64
-        height: 64
-        anchors.centerIn: parent
-        source: "image://icon/browser_panning_mode_" + (root.panningOn ? "on" : "off")
-        smooth: true
-    }
-
-    MouseArea {
         anchors.fill: parent
-        onClicked: root.clicked()
+        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+        model: webHistory.urls
+        delegate: HistoryDelegate {
+            onClicked: {
+                window.url = webHistory.urls[index];
+                windowStack.pop(window);
+            }
+        }
+    }
+
+    Label {
+        anchors {
+            fill: parent
+            margins: platformStyle.paddingMedium
+        }
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: platformStyle.disabledTextColor
+        text: qsTr("(No history)")
+        visible: webHistory.urls.length === 0
     }
 }

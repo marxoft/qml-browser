@@ -1,38 +1,38 @@
 /*
- * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2016 Stuart Howarth <showarth@marxoft.co.uk>
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
- * version 3, as published by the Free Software Foundation.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
  *
- * This program is distributed in the hope it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "utils.h"
-#include <QFileInfo>
-#include <QFile>
-#include <QDateTime>
+#include <QRegExp>
+#include <QUuid>
 
 Utils::Utils(QObject *parent) :
     QObject(parent)
 {
 }
 
-Utils::~Utils() {}
-
-QString Utils::fileSizeFromPath(const QString &filePath) {
-    QFileInfo file(filePath);
-    return Utils::fileSizeFromBytes(file.size());
+QString Utils::createId() {
+    const QString uuid = QUuid::createUuid().toString();
+    return uuid.mid(1, uuid.size() - 2);
 }
 
-QString Utils::fileSizeFromBytes(double bytes) {
+QString Utils::formatBytes(qint64 bytes) {
+    if (bytes <= 0) {
+        return QString("0B");
+    }
+    
     double kb = 1024;
     double mb = kb * 1024;
     double gb = mb * 1024;
@@ -46,7 +46,7 @@ QString Utils::fileSizeFromBytes(double bytes) {
         size = QString::number(bytes / mb, 'f', 2) + "MB";
     }
     else if (bytes > kb) {
-        size = QString::number(bytes / kb, 'f', 2) + "kB";
+        size = QString::number(bytes / kb, 'f', 2) + "KB";
     }
     else {
         size = QString::number(bytes) + "B";
@@ -55,70 +55,18 @@ QString Utils::fileSizeFromBytes(double bytes) {
     return size;
 }
 
-QString Utils::dateFromSecs(qint64 secs, bool showTime) {
-    return Utils::dateFromMSecs(secs * 1000, showTime);
+QString Utils::formatMSecs(qint64 ms) {    
+    return ms > 0 ? formatSecs(ms / 1000) : QString("--:--");
 }
 
-QString Utils::dateFromMSecs(qint64 msecs, bool showTime) {
-    QString date;
-
-    if (showTime) {
-        date = QDateTime::fromMSecsSinceEpoch(msecs).toString("dd/MM/yyyy | HH:mm");
-    }
-    else {
-        date = QDateTime::fromMSecsSinceEpoch(msecs).toString("dd/MM/yyyy");
-    }
-
-    return date;
+QString Utils::formatSecs(qint64 s) {    
+    return s > 0 ? QString("%1:%2").arg(s / 60, 2, 10, QChar('0')).arg(s % 60, 2, 10, QChar('0')) : QString("--:--");
 }
 
-QString Utils::localDateTimeFromString(const QString &dateTimeString, Qt::DateFormat format) {
-    QDateTime dt = QDateTime::fromString(dateTimeString, format);
-
-    if (!dt.isValid()) {
-        dt = QDateTime::currentDateTimeUtc();
-    }
-
-    return dt.toLocalTime().toString("dd/MM/yyyy | HH:mm");
+QString Utils::getSanitizedFileName(const QString &fileName) {
+    return QString(fileName).replace(QRegExp("[\\/\\\\\\|]"), "_");
 }
 
-QString Utils::httpErrorString(int errorCode) {
-    switch (errorCode) {
-    case 400:
-        return tr("Bad request");
-    case 401:
-        return tr("Request is unauthorised");
-    case 403:
-        return tr("Request is forbidden");
-    case 404:
-        return tr("Requested resource is unavailable");
-    case 406:
-        return tr("Requested resource is not accessible");
-    case 422:
-        return tr("Request cannot be processed");
-    case 429:
-        return tr("Request limit has been reached. Please try again later");
-    case 500:
-        return tr("Internal server error. Please try again later");
-    case 503:
-        return tr("Service unavailable. Please try again later");
-    case 504:
-        return tr("Request timed out. Please try again later");
-    default:
-        return tr("Unknown error. Please try again later");
-    }
-}
-
-void Utils::log(const QString &filePath, const QByteArray &message) {
-    QFile lf(filePath);
-
-    if (lf.open(QIODevice::Append)) {
-        lf.write(QDateTime::currentDateTime().toString().toUtf8() + ": " + message + "\n");
-    }
-
-    lf.close();
-}
-
-QString Utils::versionNumber() {
-    return QString("0.8.5");
+bool Utils::isLocalFile(const QUrl &url) {
+    return (url.scheme() == "file") || (url.toString().startsWith("/"));
 }

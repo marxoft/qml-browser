@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2016 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -20,41 +20,58 @@ import org.hildon.components 1.0
 Dialog {
     id: root
 
+    property alias regExp: regexpField.text
+    property alias command: commandField.text
+
     height: column.height + platformStyle.paddingMedium
-    title: qsTr("About")
+    title: qsTr("URL handler")
     
     Column {
         id: column
-        
+
         anchors {
             left: parent.left
-            right: parent.right
+            right: button.left
+            rightMargin: platformStyle.paddingMedium
             bottom: parent.bottom
         }
         spacing: platformStyle.paddingMedium
 
-        Row {
+        Label {
             width: parent.width
-            spacing: platformStyle.paddingMedium
-            
-            Image {                
-                source: "file:///usr/share/icons/hicolor/64x64/hildon/general_web.png"
-            }
+            text: qsTr("Regular expression")
+        }
 
-            Label {
-                height: 64
-                verticalAlignment: Text.AlignVCenter
-                font.bold: true
-                font.pointSize: platformStyle.fontSizeLarge
-                text: "QML Browser " + VERSION_NUMBER
-            }
+        TextField {
+            id: regexpField
+            
+            width: parent.width
         }
 
         Label {
             width: parent.width
-            wrapMode: Text.WordWrap
-            text: qsTr("A simple web browser written using")
-                  + " Qt Components Hildon.<br><br>&copy; Stuart Howarth 2015"
+            text: qsTr("Command (%u for URL)")
+        }
+
+        TextField {
+            id: commandField
+            
+            width: parent.width
         }
     }
+
+    Button {
+        id: button
+        
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
+        style: DialogButtonStyle {}
+        text: qsTr("Done")
+        enabled: (regexpField.text != "") && (commandField.text != "")
+        onClicked: root.accept()
+    }
+    
+    Component.onCompleted: regexpField.forceActiveFocus()
 }

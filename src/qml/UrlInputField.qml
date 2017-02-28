@@ -23,9 +23,6 @@ TextField {
 
     property bool showProgressIndicator: false
     property real progress
-    property alias comboboxEnabled: combobox.enabled
-
-    signal comboboxTriggered
 
     function setUrl(url) {
         if (url) {
@@ -45,7 +42,7 @@ TextField {
             if ((url.indexOf(".") < 0) || (url.indexOf(" ") >= 0)) {
                 if (searchEngines.count > 1) {
                     return searchEngines.data(0, SearchEngineModel.UrlRole).toString()
-                                             .replace(/%QUERY%/ig, url.replace(/\s+/g, "+"));
+                                             .replace(/%q/ig, url.replace(/\s+/g, "+"));
                 }
 
                 return "https://duckduckgo.com?q=" + url.replace(/\s+/g, "+");
@@ -58,46 +55,27 @@ TextField {
         return url;
     }
 
-    height: parent.height
+    height: 75
     inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-    style: TextFieldStyle {
-        paddingRight: 70
-    }
-
-    Image {
-        id: combobox
-
-        width: 60
-        height: 70
-        anchors {
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-        }
-
-        source: "image://theme/ComboBoxButton" + (mouseArea.pressed ? "Pressed" : enabled ? "Normal" : "Disabled")
-
-        MouseArea {
-            id: mouseArea
-
-            z: 1000
-            width: 60
-            height: 70
-            anchors.centerIn: parent
-            onClicked: root.comboboxTriggered()
-        }
-    }
-
-    Image {
-        id: progressIndicator
-
-        width: visible ? Math.floor((parent.width - 80) * root.progress / 100) : 0
+    
+    Loader {
+        id: progressLoader
+        
         anchors {
             top: parent.top
             bottom: parent.bottom
             left: parent.left
             leftMargin: 20
         }
-        source: "image://theme/TextInputProgress"
-        visible: (root.showProgressIndicator) && (root.progress < 100)
+        sourceComponent: (root.showProgressIndicator) && (root.progress < 100) ? progressIndicator : undefined
+    }
+
+    Component {
+        id: progressIndicator
+        
+        Image {            
+            width: Math.floor((root.width - 80) * root.progress / 100)
+            source: "image://theme/TextInputProgress"
+        }
     }
 }

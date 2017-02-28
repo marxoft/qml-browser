@@ -73,6 +73,7 @@ Dialog {
             right: parent.right
             bottom: parent.bottom
         }
+        style: DialogButtonStyle {}
         text: qsTr("Save")
         enabled: (nameInput.text != "") && (addressInput.text != "")
         onClicked: root.accept()
@@ -110,8 +111,20 @@ Dialog {
             }
         }
     }
+    
+    ScreenShot {
+        id: screenshot
 
-    onStatusChanged: if (status == DialogStatus.Open) nameInput.forceActiveFocus();
+        width: 160
+        height: 96
+        //target: webView
+        target: window
+        targetHeight: Math.min(flicker.height, window.height * 0.6)
+        fileName: BOOKMARKS_PATH + Qt.md5(webView.url) + ".jpg"
+        overwriteExistingFile: true
+        smooth: true
+    }
+
     onAccepted: {
         if (bookmarks.addBookmark(nameInput.text, screenshot.fileName, addressInput.text,
             webView.url.toString() == addressInput.text)) {
@@ -121,25 +134,7 @@ Dialog {
         else {
             informationBox.information(qsTr("Cannot add bookmark"));
         }
-        
-        nameInput.clear();
-        addressInput.clear();
-    }
-    onRejected: {
-        nameInput.clear();
-        addressInput.clear();
     }
 
-    ScreenShot {
-        id: screenshot
-
-        width: 160
-        height: 96
-        //target: webView
-        target: window
-        targetHeight: Math.min(flicker.height, window.height * 0.6)
-        fileName: "/home/user/.config/QMLBrowser/bookmarks/" + Qt.md5(webView.url) + ".jpg"
-        overwriteExistingFile: true
-        smooth: true
-    }
+    Component.onCompleted: nameInput.forceActiveFocus()
 }

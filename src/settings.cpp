@@ -77,6 +77,17 @@ void Settings::setUseCustomURLHandlers(bool use) {
     }
 }
 
+QString Settings::searchEngine() const {
+    return value("searchEngine", "DuckDuckGo").toString();
+}
+
+void Settings::setSearchEngine(const QString &engine) {
+    if (engine != searchEngine()) {
+        setValue("searchEngine", engine);
+        emit searchEngineChanged();
+    }
+}
+
 bool Settings::privateBrowsingEnabled() const {
     return value("Content/privateBrowsingEnabled", false).toBool();
 }

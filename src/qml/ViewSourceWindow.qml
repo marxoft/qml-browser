@@ -21,14 +21,27 @@ Window {
     id: root
 
     property alias source: textArea.text
-
-    TextArea {
-        id: textArea
-
+    
+    Flickable {
+        id: flickable
+        
         anchors.fill: parent
-        readOnly: true
-        wrapMode: TextEdit.NoWrap
-        textFormat: Text.PlainText
-        font.pixelSize: qmlBrowserSettings.defaultFontSize
+        contentHeight: textArea.height + platformStyle.paddingMedium * 2
+        pressDelay: 1000
+        
+        TextArea {
+            id: textArea
+            
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                margins: platformStyle.paddingMedium
+            }
+            readOnly: true
+            wrapMode: TextEdit.Wrap
+            textFormat: Text.PlainText
+            font.pixelSize: qmlBrowserSettings.defaultFontSize
+        }
     }
 }

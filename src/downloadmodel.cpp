@@ -15,20 +15,18 @@
  */
 
 #include "downloadmodel.h"
+#include "logger.h"
 #include "utils.h"
 #include <QSettings>
 #include <QMaemo5InformationBox>
-#include <QDateTime>
-#include <QDebug>
 
-static const QString FILE_NAME("/home/user/.config/QMLBrowser/downloads");
+static const QString STORAGE_PATH("/home/user/.config/QMLBrowser/downloads");
 static const int MAX_DOWNLOADS = 1;
 
 DownloadModel::DownloadModel(QObject *parent) :
     QAbstractListModel(parent)
 {
     QHash<int, QByteArray> roles;
-    roles[Qt::DisplayRole] = "display";
     roles[NameRole] = "name";
     roles[SizeRole] = "size";
     roles[BytesReceivedRole] = "bytesReceived";
@@ -39,7 +37,9 @@ DownloadModel::DownloadModel(QObject *parent) :
     setRoleNames(roles);
 }
 
-DownloadModel::~DownloadModel() {}
+DownloadModel::~DownloadModel() {
+    save();
+}
 
 int DownloadModel::activeDownloads() const {
     return m_activeList.size();
@@ -90,68 +90,86 @@ Download* DownloadModel::get(int row) const {
     return 0;
 }
 
-void DownloadModel::load() {
-    QSettings settings(FILE_NAME, QSettings::NativeFormat);
-
-    foreach (QString group, settings.childGroups()) {
-        settings.beginGroup(group);
-        QUrl url(settings.value("url").toUrl());
-        QString fileName(settings.value("fileName").toString());
-
-        if ((url.isValid()) && (!fileName.isEmpty())) {
-            Download *download = new Download(group,
-                                              url,
-                                              settings.value("headers").toMap(),
-                                              fileName,
-                                              settings.value("size").toLongLong(),
-                                              settings.value("bytesReceived").toLongLong(),
-                                              this);
-
-            connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
-            connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
-            connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
-            connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
-            connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
-            connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
-            connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
-            connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
-            connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
-            beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
-            m_list.append(download);
-            endInsertRows();
-            emit countChanged();
-            qDebug() << "Download added:" << url.toString() << fileName;
-        }
-        else {
-            qDebug() << "Cannot add download" << url.toString() << fileName;
-        }
-
-        settings.endGroup();
+static QVariant networkRequestToVariant(const QNetworkRequest &request) {
+    QVariantMap var;
+    var["url"] = request.url();
+    QVariantMap headers;
+    
+    foreach (const QByteArray &header, request.rawHeaderList()) {
+        headers[QString::fromUtf8(header)] = request.rawHeader(header);
     }
+    
+    var["headers"] = headers;
+    return var;
+}
 
+static QNetworkRequest variantToNetworkRequest(const QVariant &variant) {
+    QVariantMap var = variant.toMap();
+    QNetworkRequest request(var.value("url").toUrl());
+    QMapIterator<QString, QVariant> iterator(var.value("headers").toMap());
+    
+    while (iterator.hasNext()) {
+        iterator.next();
+        request.setRawHeader(iterator.key().toUtf8(), iterator.value().toByteArray());
+    }
+    
+    return request;
+}
+
+void DownloadModel::load() {
+    QSettings settings(STORAGE_PATH, QSettings::IniFormat);
+    const int count = settings.beginReadArray("downloads");
+
+    for (int i = 0; i < count; i++) {
+        settings.setArrayIndex(i);
+        Download *download = new Download(settings.value("id").toString(),
+                                          variantToNetworkRequest(settings.value("request")),
+                                          settings.value("fileName").toString(),
+                                          settings.value("size").toLongLong(),
+                                          settings.value("bytesReceived").toLongLong(),
+                                          this);
+        connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
+        connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
+        connect(download, SIGNAL(paused(Download*)), this, SLOT(onDownloadPaused(Download*)));
+        connect(download, SIGNAL(canceled(Download*)), this, SLOT(onDownloadCanceled(Download*)));
+        connect(download, SIGNAL(finished(Download*)), this, SLOT(onDownloadFinished(Download*)));
+        connect(download, SIGNAL(fileNameChanged()), this, SLOT(onDownloadDataChanged()));
+        connect(download, SIGNAL(sizeChanged()), this, SLOT(onDownloadDataChanged()));
+        connect(download, SIGNAL(progressChanged()), this, SLOT(onDownloadDataChanged()));
+        connect(download, SIGNAL(runningChanged()), this, SLOT(onDownloadDataChanged()));
+        beginInsertRows(QModelIndex(), m_list.size(), m_list.size());
+        m_list.append(download);
+        endInsertRows();
+        emit countChanged();
+    }
+    
+    settings.endArray();
+    Logger::log(QString("DownloadModel::load(). %1 downloads loaded.").arg(rowCount()), Logger::MediumVerbosity);
     startNextDownload();
 }
 
 void DownloadModel::save() {
-    QSettings settings(FILE_NAME, QSettings::NativeFormat);
+    QSettings settings(STORAGE_PATH, QSettings::IniFormat);
     settings.clear();
+    settings.beginWriteArray("downloads");
 
-    foreach (Download *download, m_list) {
-        settings.beginGroup(download->id());
-        settings.setValue("url", download->url());
-        settings.setValue("headers", download->headers());
+    for (int i = 0; i < m_list.size(); i++) {
+        const Download *download = m_list.at(i);
+        settings.setArrayIndex(i);
+        settings.setValue("id", download->id());
+        settings.setValue("request", networkRequestToVariant(download->request()));
         settings.setValue("fileName", download->fileName());
         settings.setValue("size", download->size());
         settings.setValue("bytesReceived", download->bytesReceived());
-        settings.endGroup();
     }
+    
+    settings.endArray();
+    Logger::log(QString("DownloadModel::save(). %1 downloads saved.").arg(m_list.size()), Logger::MediumVerbosity);
 }
 
-void DownloadModel::addDownload(const QUrl &url, const QVariantMap &headers, const QString &fileName) {
-    qsrand(QDateTime::currentMSecsSinceEpoch());
-    Download *download = new Download(QString::number(qrand()), this);
-    download->setUrl(url);
-    download->setHeaders(headers);
+void DownloadModel::addDownload(const QNetworkRequest &request, const QString &fileName) {
+    Download *download = new Download(Utils::createId(), this);
+    download->setRequest(request);
     download->setFileName(fileName);
     connect(download, SIGNAL(queued(Download*)), this, SLOT(onDownloadQueued(Download*)));
     connect(download, SIGNAL(started(Download*)), this, SLOT(onDownloadStarted(Download*)));
@@ -167,7 +185,7 @@ void DownloadModel::addDownload(const QUrl &url, const QVariantMap &headers, con
     endInsertRows();
     emit countChanged();
     QMaemo5InformationBox::information(0, tr("Download '%1' added").arg(fileName.section('/', -1)));
-    qDebug() << "Download added:" << url.toString() << fileName;
+    save();
     startNextDownload();
 }
 
@@ -177,8 +195,8 @@ void DownloadModel::removeDownload(Download *download) {
     m_list.removeAt(row);
     endRemoveRows();
     emit countChanged();
-    qDebug() << "Download removed:" << download->url().toString() << download->fileName();
     download->deleteLater();
+    save();
 }
 
 void DownloadModel::startNextDownload() {
@@ -226,14 +244,17 @@ void DownloadModel::onDownloadFinished(Download *download) {
 
     switch (download->error()) {
     case Download::NoError:
-        QMaemo5InformationBox::information(0, tr("Downloading of '%1' completed").arg(download->fileName().section('/', -1)));
-        qDebug() << "Download completed:" << download->url().toString() << download->errorString();
+        QMaemo5InformationBox::information(0, tr("Downloading of '%1' completed")
+                                           .arg(download->fileName().section('/', -1)));
+        Logger::log("DownloadModel::onDownloadFinished(). Download completed: " + download->fileName(),
+                    Logger::MediumVerbosity);
         removeDownload(download);
         break;
     default:
-        QMaemo5InformationBox::information(0, tr("Downloading of '%1' failed.\nReason: %2").arg(download->fileName().section('/', -1)).arg(download->errorString()),
+        QMaemo5InformationBox::information(0, tr("Downloading of '%1' failed.\nReason: %2")
+                                           .arg(download->fileName().section('/', -1)).arg(download->errorString()),
                                            QMaemo5InformationBox::NoTimeout);
-        qDebug() << "Download failed:" << download->url().toString() << download->errorString();
+        Logger::log("DownloadModel::onDownloadFinished(). Download failed: " + download->errorString());
         break;
     }
 

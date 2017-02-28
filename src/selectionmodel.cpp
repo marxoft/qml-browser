@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2016 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -17,39 +17,16 @@
 #include "selectionmodel.h"
 
 SelectionModel::SelectionModel(QObject *parent) :
-    QAbstractListModel(parent),
-    m_alignment(Qt::AlignCenter)
+    QAbstractListModel(parent)
 {
-    m_roles[NameRole] = "name";
-    m_roles[ValueRole] = "value";
-#if QT_VERSION < 0x050000
-    setRoleNames(m_roles);
-#endif
+    QHash<int, QByteArray> roles;
+    roles[NameRole] = "name";
+    roles[ValueRole] = "value";
+    setRoleNames(roles);
 }
-
-#if QT_VERSION >= 0x050000
-QHash<int, QByteArray> SelectionModel::roleNames() const {
-    return m_roles;
-}
-#endif
 
 int SelectionModel::rowCount(const QModelIndex &) const {
     return m_items.size();
-}
-
-Qt::Alignment SelectionModel::textAlignment() const {
-    return m_alignment;
-}
-
-void SelectionModel::setTextAlignment(Qt::Alignment align) {
-    if (align != textAlignment()) {
-        m_alignment = align;
-        emit textAlignmentChanged();
-        
-        if (!m_items.isEmpty()) {
-            emit dataChanged(index(0), index(m_items.size() - 1));
-        }
-    }
 }
 
 QVariant SelectionModel::data(const QModelIndex &index, int role) const {
@@ -58,8 +35,6 @@ QVariant SelectionModel::data(const QModelIndex &index, int role) const {
     }
     
     switch (role) {
-    case Qt::TextAlignmentRole:
-        return QVariant(textAlignment());
     case NameRole:
         return m_items.at(index.row()).first;
     case ValueRole:
@@ -93,64 +68,78 @@ bool SelectionModel::setData(const QModelIndex &index, const QVariant &value, in
         return false;
     }
     
+    switch (index.column()) {
+    case 0:
+        emit dataChanged(index, index.sibling(index.row(), 1));
+        break;
+    default:
+        emit dataChanged(index.sibling(index.row(), 0), index);
+        break;
+    }
+    
     return true;
 }
 
 bool SelectionModel::setItemData(const QModelIndex &index, const QMap<int, QVariant> &roles) {
+    if (roles.isEmpty()) {
+        return false;
+    }
+    
     QMapIterator<int, QVariant> iterator(roles);
-    bool ok = false;
     
     while (iterator.hasNext()) {
         iterator.next();
-        ok = setData(index, iterator.value(), iterator.key());
         
-        if (!ok) {
+        if (!setData(index, iterator.value(), iterator.key())) {
             return false;
         }
     }
     
-    return ok;
+    return true;
 }
 
-QVariant SelectionModel::data(int row, const QByteArray &role) const {
-    return data(index(row), m_roles.key(role));
+QVariant SelectionModel::data(int row, int role) const {
+    return data(index(row), role);
 }
 
 QVariantMap SelectionModel::itemData(int row) const {
     QVariantMap map;
-    map["name"] = data(row, "name");
-    map["value"] = data(row, "value");
+    map[QString::number(NameRole)] = data(row, NameRole);
+    map[QString::number(ValueRole)] = data(row, ValueRole);
     
     return map;
 }
 
-bool SelectionModel::setData(int row, const QVariant &value, const QByteArray &role) {
-    return setData(index(row), value, m_roles.key(role));
+bool SelectionModel::setData(int row, const QVariant &value, int role) {
+    return setData(index(row), value, role);
 }
 
 bool SelectionModel::setItemData(int row, const QVariantMap &roles) {
+    if (roles.isEmpty()) {
+        return false;
+    }
+    
     QMapIterator<QString, QVariant> iterator(roles);
-    bool ok = false;
     
     while (iterator.hasNext()) {
         iterator.next();
-        ok = setData(row, iterator.value(), iterator.key().toUtf8());
-        if (!ok) {
+        
+        if (!setData(row, iterator.value(), iterator.key().toInt())) {
             return false;
         }
     }
     
-    return ok;
+    return true;
 }
 
-int SelectionModel::match(const QByteArray &role, const QVariant &value) const {
-    for (int i = 0; i < m_items.size(); i++) {
-        if (data(i, role) == value) {
-            return i;
-        }
-    }
-    
-    return -1;
+QModelIndexList SelectionModel::match(const QModelIndex &start, int role, const QVariant &value, int hits,
+                                      Qt::MatchFlags flags) const {
+    return QAbstractListModel::match(start, role, value, hits, flags);
+}
+
+int SelectionModel::match(int start, int role, const QVariant &value, int flags) const {
+    const QModelIndexList idxs = match(index(start), role, value, 1, Qt::MatchFlags(flags));
+    return idxs.isEmpty() ? -1 : idxs.first().row();
 }
 
 void SelectionModel::append(const QString &name, const QVariant &value) {

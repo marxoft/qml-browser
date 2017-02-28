@@ -20,7 +20,6 @@ import org.hildon.components 1.0
 Dialog {
     id: root
 
-    property alias fileName: nameInput.text
     property string location
     property variant request
 
@@ -50,7 +49,7 @@ Dialog {
             width: parent.width
             text: qsTr("Location")
             valueText: root.location ? root.location : "N900"
-            onClicked: fileDialog.open()
+            onClicked: popupManager.open(fileDialog, root)
         }
     }
     
@@ -61,6 +60,7 @@ Dialog {
             right: parent.right
             bottom: parent.bottom
         }
+        style: DialogButtonStyle {}
         text: qsTr("Save")
         enabled: nameInput.text != ""
         onClicked: /[\/]/g.test(nameInput.text) ? informationBox.information("'/' " + qsTr("character not allowed"))
@@ -99,23 +99,30 @@ Dialog {
             }
         }
     }
-
-    onStatusChanged: if (status == DialogStatus.Open) nameInput.forceActiveFocus();
-    onAccepted: {
-        downloads.addDownload(request.url, request.headers,
-                              (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text);
-        nameInput.clear();
-        root.location = "";
-    }
-    onRejected: {
-        nameInput.clear();
-        root.location = "";
-    }
-        
-    FileDialog {
+    
+    Component {
         id: fileDialog
         
-        selectFolder: true
-        onAccepted: root.location = (folder[folder.length - 1] == "/" ? folder : folder + "/")
+        FileDialog {            
+            selectFolder: true
+            onAccepted: root.location = (folder[folder.length - 1] == "/" ? folder : folder + "/")
+        }
     }
+    
+    onRequestChanged: {
+        if (request) {
+            try {
+                var header = request.rawHeader("Content-Disposition");
+                nameInput.text = /(filename=|filename\*=UTF-8''|filename\*= UTF-8'')([^;]+)/.exec(header)[2];
+            }
+            catch(e) {
+                var url = request.url.toString();
+                nameInput.text = url.substring(url.lastIndexOf("/") + 1);
+            }
+        }
+    }
+                
+    onAccepted: downloads.addDownload(request, (root.location ? root.location : "/home/user/MyDocs/") + nameInput.text)
+    
+    Component.onCompleted: nameInput.forceActiveFocus()
 }

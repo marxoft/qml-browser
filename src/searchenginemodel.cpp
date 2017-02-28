@@ -17,9 +17,10 @@
 #include "searchenginemodel.h"
 #include <QSettings>
 #include <QDir>
-#include <QIcon>
 
-static const QString FILE_NAME("/home/user/.config/QMLBrowser/searchengines.conf");
+static const QString STORAGE_PATH("/home/user/.config/QMLBrowser/searchengines");
+static const QString WEB_ICON("/usr/share/icons/hicolor/48x48/hildon/general_web.png");
+static const QString ADD_ICON("/usr/share/icons/hicolor/48x48/hildon/general_add.png");
 
 SearchEngineModel::SearchEngineModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -43,10 +44,8 @@ QVariant SearchEngineModel::data(const QModelIndex &index, int role) const {
     }
 
     switch (role) {
-    case Qt::DisplayRole:
+    case NameRole:
         return m_list.at(index.row()).name;
-    case Qt::DecorationRole:
-        return QIcon(m_list.at(index.row()).icon);
     case IconRole:
         return m_list.at(index.row()).icon;
     case UrlRole:
@@ -77,13 +76,11 @@ bool SearchEngineModel::setData(const QModelIndex &index, const QVariant &value,
     }
 
     emit dataChanged(index, index);
-
-    QSettings settings(FILE_NAME, QSettings::NativeFormat);
+    QSettings settings(STORAGE_PATH, QSettings::NativeFormat);
     settings.beginGroup(m_list.at(index.row()).name);
     settings.setValue("icon", m_list.at(index.row()).icon);
     settings.setValue("url", m_list.at(index.row()).url);
     settings.endGroup();
-
     return true;
 }
 
@@ -92,7 +89,7 @@ bool SearchEngineModel::setData(int row, const QVariant &value, int role) {
 }
 
 void SearchEngineModel::addSearchEngine(const QString &name, const QString &icon, const QString &url) {
-    QSettings settings(FILE_NAME, QSettings::NativeFormat);
+    QSettings settings(STORAGE_PATH, QSettings::NativeFormat);
     settings.beginGroup(name);
     settings.setValue("icon", icon);
     settings.setValue("url", url);
@@ -112,25 +109,20 @@ void SearchEngineModel::removeSearchEngine(const QString &name) {
 void SearchEngineModel::removeSearchEngine(int row) {
     if ((row >= 0) && (row < m_list.size())) {
         beginRemoveRows(QModelIndex(), row, row);
-        QSettings(FILE_NAME, QSettings::NativeFormat).remove(m_list.takeAt(row).name);
+        QSettings(STORAGE_PATH, QSettings::NativeFormat).remove(m_list.takeAt(row).name);
         endRemoveRows();
         emit countChanged();
     }
 }
 
 void SearchEngineModel::load() {
-    QSettings settings(FILE_NAME, QSettings::NativeFormat);
-    QDir dir(FILE_NAME.left(FILE_NAME.lastIndexOf('/')));
-
+    QSettings settings(STORAGE_PATH, QSettings::NativeFormat);
+    QDir dir(STORAGE_PATH.left(STORAGE_PATH.lastIndexOf('/')));
     beginResetModel();
     m_list.clear();
 
-    QStringList groups = settings.childGroups();
-    groups.sort();
-
-    foreach (QString group, groups) {
+    foreach (const QString &group, settings.childGroups()) {
         settings.beginGroup(group);
-
         QString icon = settings.value("icon").toString();
 
         if (!icon.isEmpty()) {
@@ -138,7 +130,7 @@ void SearchEngineModel::load() {
         }
 
         if ((icon.isEmpty()) || (!dir.exists(icon))) {
-            icon = "/usr/share/icons/hicolor/48x48/hildon/general_web.png";
+            icon = WEB_ICON;
         }
 
         SearchEngine se;
@@ -146,14 +138,8 @@ void SearchEngineModel::load() {
         se.icon = icon;
         se.url = settings.value("url").toString();
         m_list.append(se);
-
         settings.endGroup();
     }
-
-    SearchEngine se;
-    se.name = tr("Add search engine");
-    se.icon = "/usr/share/icons/hicolor/48x48/hildon/general_add.png";
-    m_list.append(se);
 
     endResetModel();
     emit countChanged();

@@ -58,7 +58,7 @@ public Q_SLOTS:
     void load();
     void save();
 
-    void addDownload(const QUrl &url, const QVariantMap &headers, const QString &fileName);
+    void addDownload(const QNetworkRequest &request, const QString &fileName);
 
 private Q_SLOTS:
     void onDownloadQueued(Download *download);

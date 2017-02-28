@@ -15,18 +15,18 @@
  */
 
 #include "bookmarksmodel.h"
+#include "logger.h"
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QDir>
 #include <QFile>
 #include <QStandardItem>
 #include <QDateTime>
-#include <QDebug>
 
-static const QString FILE_NAME("/home/user/.config/QMLBrowser/bookmarks/bookmarks.xml");
-static const QString THUMBNAILS_DIR("/home/user/.config/QMLBrowser/bookmarks/");
-static const QString ALT_FILE_NAME("/home/user/.bookmarks/MyBookmarks.xml");
-static const QString ALT_THUMBNAILS_DIR("/home/user/.bookmarks/thumbnails/");
+static const QString BOOKMARKS_PATH("/home/user/.config/QMLBrowser/bookmarks/bookmarks.xml");
+static const QString THUMBNAILS_PATH("/home/user/.config/QMLBrowser/bookmarks/");
+static const QString ALT_BOOKMARKS_PATH("/home/user/.bookmarks/MyBookmarks.xml");
+static const QString ALT_THUMBNAILS_PATH("/home/user/.bookmarks/thumbnails/");
 
 BookmarksModel::BookmarksModel(QObject *parent) :
     QStandardItemModel(parent)
@@ -43,7 +43,9 @@ BookmarksModel::BookmarksModel(QObject *parent) :
     setSortRole(VisitCountRole);
 }
 
-BookmarksModel::~BookmarksModel() {}
+BookmarksModel::~BookmarksModel() {
+    save();
+}
 
 QVariant BookmarksModel::data(const QModelIndex &index, int role) const {
     return QStandardItemModel::data(index, role);
@@ -70,7 +72,7 @@ bool BookmarksModel::setData(int row, const QVariant &value, int role) {
 }
 
 bool BookmarksModel::addBookmark(const QString &title, const QString &thumbnail, const QString &url, bool visited) {
-    QStandardItem *item = new QStandardItem(QIcon(thumbnail), QString("%1\n%2").arg(title).arg(url));
+    QStandardItem *item = new QStandardItem;
     item->setData(title, TitleRole);
     item->setData(thumbnail, ThumbnailRole);
     item->setData(url, UrlRole);
@@ -83,19 +85,17 @@ bool BookmarksModel::addBookmark(const QString &title, const QString &thumbnail,
     
     appendRow(item);
     sort(0, Qt::DescendingOrder);
-
     emit countChanged();
-    
     return true;
 }
 
 bool BookmarksModel::removeBookmark(int row) {
-    QString thumbnail = data(row, ThumbnailRole).toString();
+    const QString thumbnail = data(row, ThumbnailRole).toString();
 
     if (removeRows(row, 1)) {
         emit countChanged();
 
-        if (thumbnail.startsWith(THUMBNAILS_DIR)) {
+        if (thumbnail.startsWith(THUMBNAILS_PATH)) {
             // Delete the thumbnail if it belongs to QML Browser
             QFile::remove(thumbnail);
         }
@@ -119,17 +119,17 @@ void BookmarksModel::urlVisited(const QString &url) {
 }
 
 void BookmarksModel::load() {
-    if (!QDir().mkpath(FILE_NAME.left(FILE_NAME.lastIndexOf("/")))) {
-        qDebug() << "Cannot create path for bookmarks";
+    if (!QDir().mkpath(THUMBNAILS_PATH)) {
+        Logger::log("BookmarksModel::load(). Cannot create path for bookmarks");
         return;
     }
 
-    QFile file(FILE_NAME);
+    QFile file(BOOKMARKS_PATH);
     bool alt = false;
 
     if (!file.exists()) {
         // Load MicroB bookmarks
-        file.setFileName(ALT_FILE_NAME);
+        file.setFileName(ALT_BOOKMARKS_PATH);
         alt = true;
     }
 
@@ -173,7 +173,6 @@ void BookmarksModel::load() {
 
                 if (!bookmarkDeleted) {
                     QStandardItem *item = new QStandardItem;
-                    item->setText(QString("%1\n%2").arg(title).arg(url));
                     item->setData(url, UrlRole);
                     item->setData(title, TitleRole);
                     item->setData(timeAdded, TimeAddedRole);
@@ -181,12 +180,13 @@ void BookmarksModel::load() {
                     item->setData(visitCount, VisitCountRole);
 
                     if (!favicon.isEmpty()) {
-                        item->setData(((alt) && (!favicon.startsWith("/")) ? ALT_THUMBNAILS_DIR : "") + favicon, FaviconRole);
+                        item->setData(((alt) && (!favicon.startsWith("/")) ? ALT_THUMBNAILS_PATH : "") + favicon,
+                                      FaviconRole);
                     }
 
                     if (!thumbnail.isEmpty()) {
-                        item->setIcon(QIcon(((alt) && (!thumbnail.startsWith("/")) ? ALT_THUMBNAILS_DIR : "") + thumbnail));
-                        item->setData(((alt) && (!thumbnail.startsWith("/")) ? ALT_THUMBNAILS_DIR : "") + thumbnail, ThumbnailRole);
+                        item->setData(((alt) && (!thumbnail.startsWith("/")) ? ALT_THUMBNAILS_PATH : "") + thumbnail,
+                                      ThumbnailRole);
                     }
 
                     appendRow(item);
@@ -198,17 +198,17 @@ void BookmarksModel::load() {
         emit countChanged();
     }
     else {
-        qDebug() << "Cannot load bookmarks:" << file.errorString();
+        Logger::log("BookmarksModel::load(). Cannot load bookmarks: " + file.errorString());
     }
 }
 
 bool BookmarksModel::save() {
-    if (!QDir().mkpath(FILE_NAME.left(FILE_NAME.lastIndexOf("/")))) {
-        qDebug() << "Cannot create path for bookmarks";
+    if (!QDir().mkpath(THUMBNAILS_PATH)) {
+        Logger::log("BookmarksModel::save(). Cannot create path for bookmarks");
         return false;
     }
 
-    QFile file(FILE_NAME);
+    QFile file(BOOKMARKS_PATH);
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QXmlStreamWriter writer(&file);
@@ -246,7 +246,6 @@ bool BookmarksModel::save() {
         return true;
     }
 
-    qDebug() << "Cannot save bookmarks:" << file.errorString();
-
+    Logger::log("BookmarksModel::save(). Cannot save bookmarks: " + file.errorString());
     return false;
 }

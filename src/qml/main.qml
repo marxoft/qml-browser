@@ -16,14 +16,15 @@
 
 import QtQuick 1.0
 import org.hildon.components 1.0
+import org.hildon.webkit 1.0
 import org.hildon.browser 1.0
-import "CreateObject.js" as ObjectCreator
 
 ApplicationWindow {
     id: window
 
     function loadBrowserWindow(url) {
-        var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"));
+        var component = Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"));
+        var browser = component.createObject(null);
         
         if (qmlBrowserSettings.openBrowserWindowsInFullScreen) {
             browser.showFullScreen();
@@ -41,24 +42,31 @@ ApplicationWindow {
     title: "QML Browser"
     menuBar: MenuBar {
         MenuItem {
-            text: qsTr("Open file")
-            onTriggered: dialogs.showFileDialog()
+            action: openAction
         }
 
         MenuItem {
             text: qsTr("Downloads")
-            onTriggered: dialogs.showDownloadsDialog()
+            onTriggered: popupManager.open(Qt.resolvedUrl("DownloadsDialog.qml"), window)
         }
 
         MenuItem {
             text: qsTr("Settings")
-            onTriggered: dialogs.showSettingsDialog()
+            onTriggered: popupManager.open(Qt.resolvedUrl("SettingsDialog.qml"), window)
         }
 
         MenuItem {
             text: qsTr("About")
-            onTriggered: dialogs.showAboutDialog()
+            onTriggered: popupManager.open(Qt.resolvedUrl("AboutDialog.qml"), window)
         }
+    }
+    
+    Action {
+        id: openAction
+        
+        text: qsTr("Open file")
+        shortcut: "Ctrl+O"
+        onTriggered: popupManager.open(fileDialog, window)
     }
 
     ListView {
@@ -74,32 +82,10 @@ ApplicationWindow {
         model: bookmarks
         delegate: BookmarkDelegate {
             onClicked: window.loadBrowserWindow(bookmarks.data(index, BookmarksModel.UrlRole))
-            onPressAndHold: contextMenu.popup()
-        }
-        
-        Keys.onPressed: {
-            if ((event.key == Qt.Key_O) && (event.modifiers == Qt.ControlModifier)) {
-                dialogs.showFileDialog();
-                event.accepted = true;
-            }
+            onPressAndHold: popupManager.open(contextMenu, window)
         }
     }
     
-    Menu {
-        id: contextMenu
-        
-        MenuItem {
-            text: qsTr("Edit")
-            onTriggered: dialogs.showBookmarkDialog(bookmarks.data(view.currentIndex, BookmarksModel.TitleRole),
-                                                    bookmarks.data(view.currentIndex, BookmarksModel.UrlRole))
-        }
-
-        MenuItem {
-            text: qsTr("Delete")
-            onTriggered: bookmarks.removeBookmark(view.currentIndex)
-        }
-    }
-
     Label {
         anchors {
             fill: parent
@@ -116,28 +102,20 @@ ApplicationWindow {
         id: toolBar
 
         height: 75
-        anchors.bottom: parent.bottom
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
 
         UrlInputField {
             id: urlInput
 
-            width: parent.width
-            comboboxEnabled: webHistory.count > 0
-            onComboboxTriggered: viewLoader.sourceComponent = (viewLoader.item ? undefined : historyView)
-            onTextChanged: {
-                if (text) {
-                    viewLoader.sourceComponent = searchView;
-                    viewLoader.item.query = text;
-                }
-                else {
-                    viewLoader.sourceComponent = undefined;
-                }
-            }
-            onFocusChanged: if ((!focus) && ((viewLoader.item) && (!viewLoader.item.focus))) viewLoader.sourceComponent = undefined;
+            width: toolBar.width
             onAccepted: {
                 window.loadBrowserWindow(urlFromTextInput(text));
                 clear();
-            }
+            }            
         }
     }
 
@@ -167,129 +145,31 @@ ApplicationWindow {
             color: platformStyle.reversedTextColor
         }
     }
-
-    Loader {
-        id: viewLoader
-        
-        anchors {
-            left: parent.left
-            leftMargin: platformStyle.paddingMedium
-            right: parent.right
-            rightMargin: platformStyle.paddingMedium
-            bottom: toolBar.top
-        }
-        height: item ? Math.min(item.count * 70, 280) : 0
-    }
     
-    QtObject {
-        id: dialogs
+    Component {
+        id: contextMenu
         
-        property DownloadsDialog downloadsDialog
-        property SettingsDialog settingsDialog
-        property FileDialog fileDialog
-        property EditBookmarkDialog bookmarkDialog
-        property NewSearchEngineDialog searchEngineDialog
-        property AboutDialog aboutDialog
-        
-        function showDownloadsDialog() {
-            if (!downloadsDialog) {
-                downloadsDialog = downloadsDialogComponent.createObject(window)
+        Menu {            
+            MenuItem {
+                text: qsTr("Edit")
+                onTriggered: popupManager.open(Qt.resolvedUrl("EditBookmarkDialog.qml"), window,
+                {name: bookmarks.data(view.currentIndex, BookmarksModel.TitleRole),
+                 address: bookmarks.data(view.currentIndex, BookmarksModel.UrlRole)})
             }
             
-            downloadsDialog.open();
-        }
-        
-        function showSettingsDialog() {
-            if (!settingsDialog) {
-                settingsDialog = settingsDialogComponent.createObject(window);
+            MenuItem {
+                text: qsTr("Delete")
+                onTriggered: bookmarks.removeBookmark(view.currentIndex)
             }
-            
-            settingsDialog.open();
-        }
-        
-        function showFileDialog() {
-            if (!fileDialog) {
-                fileDialog = fileDialogComponent.createObject(window);
-            }
-            
-            fileDialog.open();
-        }
-        
-        function showBookmarkDialog(name, address) {
-            if (!bookmarkDialog) {
-                bookmarkDialog = bookmarkDialogComponent.createObject(window);
-            }
-            
-            bookmarkDialog.name = name;
-            bookmarkDialog.address = address;
-            bookmarkDialog.open();
-        }
-        
-        function showSearchEngineDialog() {
-            if (!searchEngineDialog) {
-                searchEngineDialog = searchEngineDialogComponent.createObject(window);
-            }
-            
-            searchEngineDialog.open();
-        }
-        
-        function showAboutDialog() {
-            if (!aboutDialog) {
-                aboutDialog = aboutDialogComponent.createObject(window);
-            }
-            
-            aboutDialog.open();
         }
     }
     
     Component {
-        id: historyView
-        
-        HistoryView {}
-    }
-    
-    Component {
-        id: searchView
-        
-        SearchEngineView {}
-    }
-    
-    Component {
-        id: downloadsDialogComponent
-        
-        DownloadsDialog {}
-    }
-    
-    Component {
-        id: settingsDialogComponent
-        
-        SettingsDialog {}
-    }
-    
-    Component {
-        id: fileDialogComponent
+        id: fileDialog
         
         FileDialog {
             onAccepted: window.loadBrowserWindow("file://" + filePath)
         }
-    }
-    
-    Component {
-        id: bookmarkDialogComponent
-        
-        EditBookmarkDialog {}
-    }
-    
-    Component {
-        id: searchEngineDialogComponent
-        
-        NewSearchEngineDialog {}
-    }
-    
-    Component {
-        id: aboutDialogComponent
-        
-        AboutDialog {}
     }
 
     Component.onCompleted: {
@@ -297,7 +177,7 @@ ApplicationWindow {
                                                                      : Qt.WA_Maemo5LandscapeOrientation);
 
         if (webHistory.count == 0) {
-            webHistory.storageFileName = "/home/user/.config/QMLBrowser/history";
+            webHistory.storageFileName = HISTORY_PATH;
             webHistory.load();
         }
     }

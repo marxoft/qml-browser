@@ -15,13 +15,12 @@
  */
 
 #include "bookmarksmodel.h"
-#include "cache.h"
 #include "downloadmodel.h"
 #include "encodingmodel.h"
 #include "fontsizemodel.h"
-#include "launcher.h"
 #include "searchenginemodel.h"
 #include "settings.h"
+#include "urlopenermodel.h"
 #include "utils.h"
 #include "volumekeys.h"
 #include <QWidget>
@@ -39,28 +38,28 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setOrganizationName("QMLBrowser");
     app.setApplicationName("QML Browser");
+    app.setApplicationVersion("0.9.0");
     
     qmlRegisterType<EncodingModel>("org.hildon.browser", 1, 0, "EncodingModel");
     qmlRegisterType<FontSizeModel>("org.hildon.browser", 1, 0, "FontSizeModel");
+    qmlRegisterType<SelectionModel>("org.hildon.browser", 1, 0, "SelectionModel");
 
     qmlRegisterUncreatableType<BookmarksModel>("org.hildon.browser", 1, 0, "BookmarksModel", "");
     qmlRegisterUncreatableType<Download>("org.hildon.browser", 1, 0, "Download", "");
     qmlRegisterUncreatableType<DownloadModel>("org.hildon.browser", 1, 0, "DownloadModel", "");
     qmlRegisterUncreatableType<SearchEngineModel>("org.hildon.browser", 1, 0, "SearchEngineModel", "");
+    qmlRegisterUncreatableType<UrlOpenerModel>("org.hildon.browser", 1, 0, "UrlOpenerModel", "");
     
     QSslConfiguration config = QSslConfiguration::defaultConfiguration();
     config.setProtocol(QSsl::TlsV1);
     QSslConfiguration::setDefaultConfiguration(config);
-
+        
     Settings settings;
     Utils utils;
     VolumeKeys keys;
 
-    Cache cache;
-    cache.create();
-
-    Launcher launcher;
-    launcher.loadHandlers();
+    UrlOpenerModel opener;
+    opener.load();
 
     BookmarksModel bookmarks;
     bookmarks.load();
@@ -72,18 +71,22 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     searchEngines.load();
 
     QDeclarativeEngine engine;
-    engine.rootContext()->setContextProperty("launcher", &launcher);
-    engine.rootContext()->setContextProperty("bookmarks", &bookmarks);
-    engine.rootContext()->setContextProperty("downloads", &downloads);
-    engine.rootContext()->setContextProperty("searchEngines", &searchEngines);
-    engine.rootContext()->setContextProperty("qmlBrowserSettings", &settings);
-    engine.rootContext()->setContextProperty("qmlBrowserUtils", &utils);
-    engine.rootContext()->setContextProperty("volumeKeys", &keys);
+    QDeclarativeContext *context = engine.rootContext();
+    context->setContextProperty("urlopener", &opener);
+    context->setContextProperty("bookmarks", &bookmarks);
+    context->setContextProperty("downloads", &downloads);
+    context->setContextProperty("searchEngines", &searchEngines);
+    context->setContextProperty("qmlBrowserSettings", &settings);
+    context->setContextProperty("qmlBrowserUtils", &utils);
+    context->setContextProperty("volumeKeys", &keys);
+    context->setContextProperty("BOOKMARKS_PATH", "/home/user/.config/QMLBrowser/bookmarks/");
+    context->setContextProperty("HISTORY_PATH", "/home/user/.config/QMLBrowser/history");
+    context->setContextProperty("VERSION_NUMBER", "0.9.0");
 
     QString url;
     bool fullScreen = false;
     QStringList args = app.arguments();
-
+    
     if (args.size() > 1) {
         args.removeFirst();
 
@@ -100,11 +103,11 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     }
 
     QDeclarativeComponent component(&engine, QUrl::fromLocalFile(QString("/opt/qml-browser/qml/%1.qml")
-                                                                        .arg(url.isEmpty() ? "main" : "main_browser")));
+                                                                 .arg(url.isEmpty() ? "main" : "main_browser")));
     QObject *obj = component.create();
 
     if (component.isError()) {
-        foreach (QDeclarativeError error, component.errors()) {
+        foreach (const QDeclarativeError &error, component.errors()) {
             qWarning() << error.toString();
         }
 
@@ -128,10 +131,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
             }
         }
     }
-
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &cache, SLOT(clear()));
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &bookmarks, SLOT(save()));
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &downloads, SLOT(save()));
 
     return app.exec();
 }

@@ -32,6 +32,7 @@ class Settings : public QSettings
                NOTIFY zoomWithVolumeKeysChanged)
     Q_PROPERTY(bool useCustomURLHandlers READ useCustomURLHandlers WRITE setUseCustomURLHandlers
                NOTIFY useCustomURLHandlersChanged)
+    Q_PROPERTY(QString searchEngine READ searchEngine WRITE setSearchEngine NOTIFY searchEngineChanged)
     Q_PROPERTY(bool privateBrowsingEnabled READ privateBrowsingEnabled WRITE setPrivateBrowsingEnabled
                NOTIFY privateBrowsingEnabledChanged)
     Q_PROPERTY(bool autoLoadImages READ autoLoadImages WRITE setAutoLoadImages NOTIFY autoLoadImagesChanged)
@@ -60,6 +61,9 @@ public:
 
     bool useCustomURLHandlers() const;
     void setUseCustomURLHandlers(bool use);
+    
+    QString searchEngine() const;
+    void setSearchEngine(const QString &engine);
 
     bool privateBrowsingEnabled() const;
     void setPrivateBrowsingEnabled(bool enabled);
@@ -78,7 +82,7 @@ public:
 
     QString defaultTextEncoding() const;
     void setDefaultTextEncoding(const QString &encoding);
-
+    
     QString userAgentString() const;
     void setUserAgentString(const QString &agent);
 
@@ -88,6 +92,7 @@ Q_SIGNALS:
     void rotationEnabledChanged();
     void zoomWithVolumeKeysChanged();
     void useCustomURLHandlersChanged();
+    void searchEngineChanged();
     void privateBrowsingEnabledChanged();
     void autoLoadImagesChanged();
     void javaScriptEnabledChanged();

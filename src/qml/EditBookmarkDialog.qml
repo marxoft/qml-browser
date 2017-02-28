@@ -73,6 +73,7 @@ Dialog {
             right: parent.right
             bottom: parent.bottom
         }
+        style: DialogButtonStyle {}
         text: qsTr("Save")
         enabled: (nameInput.text != "") && (addressInput.text != "")
         onClicked: root.accept()
@@ -110,19 +111,13 @@ Dialog {
             }
         }
     }
-
-    onStatusChanged: if (status == DialogStatus.Open) nameInput.forceActiveFocus();
+    
     onAccepted: {
         if ((!bookmarks.setData(view.currentIndex, name, BookmarksModel.TitleRole))
             || (!bookmarks.setData(view.currentIndex, address, BookmarksModel.UrlRole))) {
             informationBox.information(qsTr("Cannot edit bookmark"));
         }
-        
-        nameInput.clear();
-        addressInput.clear();
     }
-    onRejected: {
-        nameInput.clear();
-        addressInput.clear();
-    }
+    
+    Component.onCompleted: nameInput.forceActiveFocus()
 }

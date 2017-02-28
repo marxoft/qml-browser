@@ -2,14 +2,7 @@
 
 set -e
 
-#if [ -e /home/user/.config/QMLBrowser/bookmarks.xml ]
-#    then
-#        echo "Removing old bookmarks"
-#        rm /home/user/.config/QMLBrowser/bookmarks.xml
-#        rm /home/user/.config/QMLBrowser/*.jpg
-#fi
-
-if [ ! -e /home/user/.config/QMLBrowser/searchengines.conf ]
+if [ ! -f /home/user/.config/QMLBrowser/searchengines ]
     then
         echo "[DuckDuckGo]
 icon=duckduckgo.png
@@ -17,7 +10,7 @@ url=https://duckduckgo.com/?q=%QUERY%
 
 [Wikipedia]
 icon=wikipedia.png
-url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines.conf
+url=http://wikipedia.org/wiki/Special:Search?search=%QUERY%" > /home/user/.config/QMLBrowser/searchengines
 
 chown -hR user:users /home/user/.config/QMLBrowser/
 

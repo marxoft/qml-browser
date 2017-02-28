@@ -2,15 +2,15 @@
  * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
+ * under the terms and conditions of the GNU General Public License,
  * version 3, as published by the Free Software Foundation.
  *
  * This program is distributed in the hope it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
  * more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -33,13 +33,13 @@ Download::Download(const QString &id, QObject *parent) :
 {
 }
 
-Download::Download(const QString &id, const QUrl &url, const QVariantMap &headers, const QString &fileName, qint64 size, qint64 received, QObject *parent) :
+Download::Download(const QString &id, const QNetworkRequest &request, const QString &fileName, qint64 size,
+                   qint64 received, QObject *parent) :
     QObject(parent),
     m_nam(0),
     m_reply(0),
     m_id(id),
-    m_url(url),
-    m_headers(headers),
+    m_request(request),
     m_fileName(fileName),
     m_size(size),
     m_received(received),
@@ -51,6 +51,7 @@ Download::Download(const QString &id, const QUrl &url, const QVariantMap &header
 Download::~Download() {
     if (m_reply) {
         delete m_reply;
+        m_reply = 0;
     }
 }
 
@@ -58,33 +59,22 @@ QString Download::id() const {
     return m_id;
 }
 
-QUrl Download::url() const {
-    return m_url;
+QNetworkRequest Download::request() const {
+    return m_request;
 }
 
-void Download::setUrl(const QUrl &url) {
-    if (url != this->url()) {
-        m_url = url;
-        emit urlChanged();
-    }
-}
-
-QVariantMap Download::headers() const {
-    return m_headers;
-}
-
-void Download::setHeaders(const QVariantMap &headers) {
-    m_headers = headers;
-    emit headersChanged();
+void Download::setRequest(const QNetworkRequest &r) {
+    m_request = r;
+    emit requestChanged();
 }
 
 QString Download::fileName() const {
     return m_fileName;
 }
 
-void Download::setFileName(const QString &fileName) {
-    if (fileName != this->fileName()) {
-        m_fileName = fileName;
+void Download::setFileName(const QString &f) {
+    if (f != fileName()) {
+        m_fileName = f;
         emit fileNameChanged();
     }
 }
@@ -93,9 +83,9 @@ qint64 Download::size() const {
     return m_size;
 }
 
-void Download::setSize(qint64 size) {
-    if (size != this->size()) {
-        m_size = size;
+void Download::setSize(qint64 s) {
+    if (s != size()) {
+        m_size = s;
         emit sizeChanged();
     }
 }
@@ -104,17 +94,17 @@ qint64 Download::bytesReceived() const {
     return m_received;
 }
 
-void Download::setBytesReceived(qint64 received) {
-    m_received = received;
+void Download::setBytesReceived(qint64 r) {
+    m_received = r;
 }
 
 int Download::progress() const {
     return m_progress;
 }
 
-void Download::setProgress(int progress) {
-    if (progress != this->progress()) {
-        m_progress = progress;
+void Download::setProgress(int p) {
+    if (p != progress()) {
+        m_progress = p;
         emit progressChanged();
     }
 }
@@ -138,8 +128,8 @@ void Download::queue() {
 }
 
 void Download::start() {
-    if (!this->isRunning()) {
-        this->startDownload();
+    if (!isRunning()) {
+        startDownload();
     }
 }
 
@@ -164,7 +154,7 @@ void Download::cancel() {
 }
 
 void Download::startDownload() {
-    m_file.setFileName(this->fileName() + TEMP_SUFFIX);
+    m_file.setFileName(fileName() + TEMP_SUFFIX);
 
     if (!m_file.open(QIODevice::Append)) {
         m_error = FileError;
@@ -176,23 +166,15 @@ void Download::startDownload() {
     m_error = NoError;
     m_errorString = QString();
     m_redirects = 0;
-    QNetworkRequest request(this->url());
-
-    QMapIterator<QString, QVariant> iterator(this->headers());
-
-    while (iterator.hasNext()) {
-        iterator.next();
-        request.setRawHeader(iterator.key().toUtf8(), iterator.value().toByteArray());
-    }
 
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
     }
 
-    m_reply = m_nam->get(request);
-    this->connect(m_reply, SIGNAL(metaDataChanged()), this, SLOT(onMetaDataChanged()));
-    this->connect(m_reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    this->connect(m_reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+    m_reply = m_nam->get(request());
+    connect(m_reply, SIGNAL(metaDataChanged()), this, SLOT(onMetaDataChanged()));
+    connect(m_reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(m_reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
     emit runningChanged();
     emit started(this);
 }
@@ -207,7 +189,7 @@ void Download::followRedirect(const QUrl &url) {
         return;
     }
 
-    m_file.setFileName(this->fileName() + TEMP_SUFFIX);
+    m_file.setFileName(fileName() + TEMP_SUFFIX);
 
     if (!m_file.open(QIODevice::Append)) {
         m_error = FileError;
@@ -222,11 +204,13 @@ void Download::followRedirect(const QUrl &url) {
     if (!m_nam) {
         m_nam = new QNetworkAccessManager(this);
     }
-
-    m_reply = m_nam->get(QNetworkRequest(url));
-    this->connect(m_reply, SIGNAL(metaDataChanged()), this, SLOT(onMetaDataChanged()));
-    this->connect(m_reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    this->connect(m_reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+    
+    QNetworkRequest r = request();
+    r.setUrl(url);
+    m_reply = m_nam->get(r);
+    connect(m_reply, SIGNAL(metaDataChanged()), this, SLOT(onMetaDataChanged()));
+    connect(m_reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(m_reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
     emit runningChanged();
 }
 
@@ -239,7 +223,7 @@ void Download::onMetaDataChanged() {
         }
 
         if (size > 0) {
-            this->setSize(size);
+            setSize(size);
         }
     }
 }
@@ -250,7 +234,7 @@ void Download::onReadyRead() {
         m_file.write(m_reply->readAll());
 
         if (m_size > 0) {
-            this->setProgress(m_received * 100 / m_size);
+            setProgress(m_received * 100 / m_size);
         }
     }
 }
@@ -287,19 +271,20 @@ void Download::onReplyFinished() {
     emit runningChanged();
 
     if (!redirect.isEmpty()) {
-        this->followRedirect(redirect);
+        followRedirect(redirect);
     }
     else {
         int i = 1;
-        QString fileName = this->fileName();
+        QString oldFileName = fileName();
+        QString newFileName = oldFileName;
 
-        while ((QFile::exists(fileName)) && (i < 100)) {
-            const int lastDot = this->fileName().lastIndexOf('.');
-            fileName = QString("%1(%2)%3").arg(this->fileName().left(lastDot)).arg(i).arg(this->fileName().mid(lastDot));
+        while ((QFile::exists(newFileName)) && (i < 100)) {
+            const int lastDot = oldFileName.lastIndexOf('.');
+            newFileName = QString("%1(%2)%3").arg(oldFileName.left(lastDot)).arg(i).arg(oldFileName.mid(lastDot));
             i++;
         }
 
-        if (!m_file.rename(fileName)) {
+        if (!m_file.rename(newFileName)) {
             m_error = FileError;
             m_errorString = m_file.errorString();
         }

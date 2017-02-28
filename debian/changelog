@@ -1,3 +1,9 @@
+qml-browser (0.9.0) unstable; urgency=low
+
+  * UI tweaks and code re-factoring.
+  
+ -- Stuart Howarth <showarth@marxoft.co.uk>  Tue, 28 Feb 2017 19:21:12 +0000
+
 qml-browser (0.8.5) unstable; urgency=low
 
   * Update to use new Qt Components Hildon.

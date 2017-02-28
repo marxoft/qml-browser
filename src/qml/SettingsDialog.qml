@@ -22,11 +22,11 @@ import org.hildon.browser 1.0
 Dialog {
     id: root
 
-    height: column.height + platformStyle.paddingMedium
+    height: 360
     title: qsTr("Settings")
     
     Flickable {
-        id: flicker
+        id: flickable
 
         anchors {
             left: parent.left
@@ -50,6 +50,8 @@ Dialog {
 
             Label {
                 width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                color: platformStyle.secondaryTextColor
                 text: qsTr("General")
             }
 
@@ -95,12 +97,32 @@ Dialog {
 
             Button {
                 width: parent.width
-                text: qsTr("Add custom URL handler")
-                onClicked: dialogs.showHandlerDialog()
+                text: qsTr("URL handlers")
+                onClicked: popupManager.open(Qt.resolvedUrl("UrlOpenersDialog.qml"), root)
+            }
+            
+            ValueButton {
+                id: searchEngineSelector
+                
+                width: parent.width
+                style: ValueButtonStyle {
+                    valueTextColor: platformStyle.activeTextColor
+                }
+                text: qsTr("Search engine")
+                valueText: qmlBrowserSettings.searchEngine
+                onClicked: popupManager.open(searchEngineDialog, root)
+            }
+            
+            Button {
+                width: parent.width
+                text: qsTr("Add search engine")
+                onClicked: popupManager.open(Qt.resolvedUrl("NewSearchEngineDialog.qml"), root)
             }
 
             Label {
                 width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                color: platformStyle.secondaryTextColor
                 text: qsTr("Content")
             }
 
@@ -146,20 +168,22 @@ Dialog {
                 checked: qmlBrowserSettings.zoomTextOnly
             }
 
-            ValueButton {
-                id: fontButton
+            ListSelectorButton {
+                id: fontSelector
 
                 width: parent.width
                 text: qsTr("Text size")
-                pickSelector: fontSelector
+                model: FontSizeModel {}
+                value: qmlBrowserSettings.defaultFontSize
             }
 
-            ValueButton {
-                id: encodingButton
+            ListSelectorButton {
+                id: encodingSelector
 
                 width: parent.width
                 text: qsTr("Encoding")
-                pickSelector: encodingSelector
+                model: EncodingModel {}
+                value: qmlBrowserSettings.defaultTextEncoding
             }
 
             Label {
@@ -183,29 +207,10 @@ Dialog {
             right: parent.right
             bottom: parent.bottom
         }
+        style: DialogButtonStyle {}
         text: qsTr("Save")
         onClicked: root.accept()
-    }
-    
-    ListPickSelector {
-        id: fontSelector
-        
-        model: FontSizeModel {
-            id: fontSizeModel
-        }
-        textRole: "name"
-        currentIndex: fontSizeModel.match("value", qmlBrowserSettings.defaultFontSize)
-    }
-    
-    ListPickSelector {
-        id: encodingSelector
-        
-        model: EncodingModel {
-            id: encodingModel
-        }
-        textRole: "name"
-        currentIndex: encodingModel.match("value", qmlBrowserSettings.defaultTextEncoding)
-    }
+    } 
     
     StateGroup {
         states: State {
@@ -218,7 +223,7 @@ Dialog {
             }
         
             AnchorChanges {
-                target: flicker
+                target: flickable
                 anchors {
                     right: parent.right
                     bottom: button.top
@@ -226,7 +231,7 @@ Dialog {
             }
         
             PropertyChanges {
-                target: flicker
+                target: flickable
                 anchors {
                     rightMargin: 0
                     bottomMargin: platformStyle.paddingMedium
@@ -239,8 +244,18 @@ Dialog {
             }
         }
     }
+    
+    Component {
+        id: searchEngineDialog
+        
+        ListPickSelector {
+            title: searchEngineSelector.text
+            model: searchEngines
+            textRole: "name"
+            onSelected: qmlBrowserSettings.searchEngine = text
+        }
+    }
 
-    onStatusChanged: if (status == DialogStatus.Open) flicker.contentY = 0;
     onAccepted: {
         screen.orientationLock = (rotationCheckbox.checked ? Qt.WA_Maemo5AutoOrientation
                                                            : Qt.WA_Maemo5LandscapeOrientation);
@@ -261,46 +276,13 @@ Dialog {
         qmlBrowserSettings.openBrowserWindowsInFullScreen = fullScreenCheckbox.checked;
         qmlBrowserSettings.forceToolBarVisibleWhenLoading = forceToolbarCheckbox.checked;
         qmlBrowserSettings.useCustomURLHandlers = handlersCheckbox.checked;
+        qmlBrowserSettings.searchEngine = searchEngineSelector.valueText
         qmlBrowserSettings.privateBrowsingEnabled = privateCheckbox.checked;
         qmlBrowserSettings.autoLoadImages = imagesCheckbox.checked;
         qmlBrowserSettings.javaScriptEnabled = jsCheckbox.checked;
         qmlBrowserSettings.zoomTextOnly = zoomTextCheckbox.checked;
-        qmlBrowserSettings.defaultFontSize = fontSizeModel.data(fontSelector.currentIndex, "value");
-        qmlBrowserSettings.defaultTextEncoding = encodingModel.data(encodingSelector.currentIndex, "value");
+        qmlBrowserSettings.defaultFontSize = fontSelector.value;
+        qmlBrowserSettings.defaultTextEncoding = encodingSelector.value;
         qmlBrowserSettings.userAgentString = userAgentInput.text;
-    }
-    onRejected: {
-        rotationCheckbox.checked = qmlBrowserSettings.rotationEnabled;
-        volumeKeysCheckbox.checked = qmlBrowserSettings.zoomWithVolumeKeys;
-        fullScreenCheckbox.checked = qmlBrowserSettings.openBrowserWindowsInFullScreen;
-        forceToolbarCheckbox.checked = qmlBrowserSettings.forceToolBarVisibleWhenLoading;
-        handlersCheckbox.checked = qmlBrowserSettings.useCustomURLHandlers;
-        privateCheckbox.checked = qmlBrowserSettings.privateBrowsingEnabled;
-        imagesCheckbox.checked = qmlBrowserSettings.autoLoadImages;
-        jsCheckbox.checked = qmlBrowserSettings.javaScriptEnabled;
-        zoomTextCheckbox.checked = qmlBrowserSettings.zoomTextOnly;
-        fontSelector.currentIndex = fontSizeModel.match("value", qmlBrowserSettings.defaultFontSize);
-        encodingSelector.currentIndex = encodingModel.match("value", qmlBrowserSettings.defaultTextEncoding);
-        userAgentInput.text = qmlBrowserSettings.userAgentString;
-    }
-
-    QtObject {
-        id: dialogs
-        
-        property NewUrlHandlerDialog handlerDialog
-        
-        function showHandlerDialog() {
-            if (!handlerDialog) {
-                handlerDialog = handlerDialogComponent.createObject(root);
-            }
-            
-            handlerDialog.open();
-        }
-    }
-    
-    Component {
-        id: handlerDialogComponent
-        
-        NewUrlHandlerDialog {}
     }
 }

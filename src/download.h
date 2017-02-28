@@ -2,15 +2,15 @@
  * Copyright (C) 2014 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software; you can redistribute it and/or modify it
- * under the terms and conditions of the GNU Lesser General Public License,
+ * under the terms and conditions of the GNU General Public License,
  * version 3, as published by the Free Software Foundation.
  *
  * This program is distributed in the hope it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
  * more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -18,23 +18,18 @@
 #ifndef DOWNLOAD_H
 #define DOWNLOAD_H
 
-#include <QObject>
-#include <QUrl>
-#include <QVariantMap>
 #include <QNetworkReply>
 #include <QFile>
 #include <qdeclarative.h>
 
 class QNetworkAccessManager;
-class QNetworkReply;
 
 class Download : public QObject
 {
     Q_OBJECT
 
     Q_PROPERTY(QString id READ id CONSTANT)
-    Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
-    Q_PROPERTY(QVariantMap headers READ headers WRITE setHeaders NOTIFY headersChanged)
+    Q_PROPERTY(QNetworkRequest request READ request WRITE setRequest NOTIFY requestChanged)
     Q_PROPERTY(QString fileName READ fileName WRITE setFileName NOTIFY fileNameChanged)
     Q_PROPERTY(qint64 size READ size NOTIFY sizeChanged)
     Q_PROPERTY(qint64 bytesReceived READ bytesReceived NOTIFY progressChanged)
@@ -75,19 +70,17 @@ public:
     };
 
     explicit Download(const QString &id, QObject *parent = 0);
-    explicit Download(const QString &id, const QUrl &url, const QVariantMap &headers, const QString &fileName, qint64 size, qint64 received, QObject *parent = 0);
+    explicit Download(const QString &id, const QNetworkRequest &request, const QString &fileName,
+                      qint64 size, qint64 received, QObject *parent = 0);
     ~Download();
 
     QString id() const;
 
-    QUrl url() const;
-    void setUrl(const QUrl &url);
-
-    QVariantMap headers() const;
-    void setHeaders(const QVariantMap &headers);
+    QNetworkRequest request() const;
+    void setRequest(const QNetworkRequest &r);
 
     QString fileName() const;
-    void setFileName(const QString &fileName);
+    void setFileName(const QString &f);
 
     qint64 size() const;
     qint64 bytesReceived() const;
@@ -105,19 +98,12 @@ public Q_SLOTS:
     void cancel();
 
 private Q_SLOTS:
-    void setSize(qint64 size);
-    void setBytesReceived(qint64 received);
-    void setProgress(int progress);
-
-    void startDownload();
-    void followRedirect(const QUrl &url);
     void onMetaDataChanged();
     void onReadyRead();
     void onReplyFinished();
 
 Q_SIGNALS:
-    void urlChanged();
-    void headersChanged();
+    void requestChanged();
     void fileNameChanged();
     void sizeChanged();
     void progressChanged();
@@ -130,6 +116,13 @@ Q_SIGNALS:
     void finished(Download *download);
     
 private:
+    void setSize(qint64 s);
+    void setBytesReceived(qint64 r);
+    void setProgress(int p);
+
+    void startDownload();
+    void followRedirect(const QUrl &url);
+    
     QNetworkAccessManager *m_nam;
     QNetworkReply *m_reply;
 
@@ -137,9 +130,7 @@ private:
 
     QString m_id;
 
-    QUrl m_url;
-
-    QVariantMap m_headers;
+    QNetworkRequest m_request;
 
     QString m_fileName;
 

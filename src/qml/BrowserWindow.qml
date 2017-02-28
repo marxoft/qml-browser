@@ -18,7 +18,6 @@ import QtQuick 1.0
 import org.hildon.components 1.0
 import org.hildon.webkit 1.0
 import org.hildon.utils 1.0
-import "CreateObject.js" as ObjectCreator
 
 ApplicationWindow {
     id: window
@@ -30,7 +29,8 @@ ApplicationWindow {
     property alias settings: webView.settings
 
     function loadBrowserWindow(url) {
-        var browser = ObjectCreator.createObject(Qt.resolvedUrl("BrowserWindow.qml"), null);
+        var component = Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"));
+        var browser = component.createObject(null);
         
         if (qmlBrowserSettings.openBrowserWindowsInFullScreen) {
             browser.showFullScreen();
@@ -48,32 +48,15 @@ ApplicationWindow {
     title: webView.title ? webView.title : "QML Browser"
     menuBar: MenuBar {
         MenuItem {
-            text: qsTr("New window")
-            onTriggered: window.loadBrowserWindow()
+            action: newAction
         }
 
         MenuItem {
-            text: qsTr("Reload")
-            enabled: (webView.status == WebView.Ready) || (webView.status == WebView.Error)
-            onTriggered: webView.reload()
-        }
-        
-        MenuItem {
-            text: qsTr("Copy")
-            enabled: (urlInput.hasSelectedText) || (webView.hasSelection)
-            onTriggered: urlInput.hasSelectedText ? urlInput.copy() : webView.copy()
+            action: reloadAction
         }
 
         MenuItem {
-            text: qsTr("Paste")
-            enabled: clipboard.hasText
-            onTriggered: urlInput.focus ? urlInput.paste() : webView.paste()
-        }
-
-        MenuItem {
-            text: qsTr("Find on page")
-            enabled: webView.status == WebView.Ready
-            onTriggered: findToolBar.visible = true
+            action: findAction
         }
 
         MenuItem {
@@ -85,38 +68,97 @@ ApplicationWindow {
 
         MenuItem {
             text: qsTr("Downloads")
-            onTriggered: dialogs.showDownloadsDialog()
+            onTriggered: popupManager.open(Qt.resolvedUrl("DownloadsDialog.qml"), window)
         }
 
         MenuItem {
             text: qsTr("Settings")
-            onTriggered: dialogs.showSettingsDialog()
+            onTriggered: popupManager.open(Qt.resolvedUrl("SettingsDialog.qml"), window)
         }
     }
-
-    Flickable {
-        id: flicker
+    
+    Action {
+        id: newAction
         
-        anchors {
-            left: parent.left
-            right: parent.right
-            top: parent.top
-            bottom: findToolBar.visible ? findToolBar.top : toolBar.visible ? toolBar.top : parent.bottom
-        }
+        text: qsTr("New window")
+        shortcut: qsTr("Ctrl+N")
+        autoRepeat: false
+        onTriggered: window.loadBrowserWindow()
+    }
+    
+    Action {
+        id: openAction
+        
+        text: qsTr("Open file")
+        shortcut: qsTr("Ctrl+O")
+        autoRepeat: false
+        onTriggered: popupManager.open(fileDialog, window)
+    }
+    
+    Action {
+        id: reloadAction
+        
+        text: qsTr("Reload")
+        shortcut: qsTr("Ctrl+R")
+        autoRepeat: false
+        enabled: (webView.status == WebView.Ready) || (webView.status == WebView.Error)
+        onTriggered: webView.reload()
+    }
+    
+    Action {
+        id: findAction
+        
+        text: qsTr("Find on page")
+        shortcut: qsTr("Ctrl+F")
+        autoRepeat: false
+        enabled: webView.status == WebView.Ready
+        onTriggered: findLoader.sourceComponent = findToolBar
+    }
+    
+    Action {
+        id: bookmarksAction
+        
+        text: qsTr("Bookmarks")
+        iconName: "general_mybookmarks_folder"
+        shortcut: qsTr("Ctrl+B")
+        autoRepeat: false
+        onTriggered: windowStack.push(Qt.resolvedUrl("BookmarksWindow.qml"))
+    }
+    
+    Action {
+        id: bookmarkAction
+        
+        text: qsTr("Add bookmark")
+        iconName: "general_add"
+        shortcut: qsTr("Ctrl+D")
+        autoRepeat: false
+        onTriggered: popupManager.open(Qt.resolvedUrl("NewBookmarkDialog.qml"), window,
+        {name: webView.title, address: webView.url});
+    }
+    
+    Action {
+        id: forwardAction
+        
+        text: qsTr("Go forward")
+        iconName: "general_forward"
+        shortcut: qsTr("Shift+Backspace")
+        autoRepeat: false
+        onTriggered: webView.forward()
+    }
+    
+    Flickable {
+        id: flickable
+        
+        anchors.fill: parent
         contentWidth: webView.width
-        contentHeight: webView.height
-        pressDelay: 100000
+        contentHeight: webView.height + (findLoader.item ? findLoader.item.height : 0)
+        + (toolLoader.item ? toolLoader.item.height : 0) + (fullscreenLoader.item ? fullscreenLoader.item.height : 0)
+        pressDelay: 1000
         
         WebView {
             id: webView
-            
-            function openUrl(u) {
-                if ((!qmlBrowserSettings.useCustomURLHandlers) || (!launcher.launch(u))) {
-                    url = u;
-                }
-            }
 
-            preferredWidth: flicker.width
+            preferredWidth: flickable.width
             userAgent: qmlBrowserSettings.userAgentString
             settings {
                 pluginsEnabled: true
@@ -127,35 +169,10 @@ ApplicationWindow {
                 defaultFontSize: qmlBrowserSettings.defaultFontSize
             }
             newWindowComponent: Qt.createComponent(Qt.resolvedUrl("BrowserWindow.qml"))
-            forwardUnsupportedContent: true
             linkDelegationPolicy: WebPage.DelegateAllLinks
-            onUrlChanged: {
-                urlInput.text = url;
-                urlInput.cursorPosition = 0;
-                viewLoader.sourceComponent = undefined;
-            }
-            onStatusChanged: {
-                if (status == WebView.Ready) {
-                    screenshot.grab();
-                    bookmarks.urlVisited(url);
-                }
-            }
-            onDownloadRequested: {
-                var fileName = request.url.toString().substring(request.url.toString().lastIndexOf("/") + 1);
-                dialogs.showSaveFileDialog(fileName, request);
-            }
-            onUnsupportedContent: {
-                var fileName;
-
-                if (content.headers["Content-disposition"]) {
-                    fileName = content.headers["Content-disposition"].toString().replace(/\"/g, "").split("filename=")[1];
-                }
-                else {
-                    fileName = content.url.toString().substring(content.url.toString().lastIndexOf("/") + 1);
-                }
-
-                dialogs.showSaveFileDialog(fileName, content);
-            }            
+            onLinkClicked: if ((!qmlBrowserSettings.useCustomURLHandlers) || (!urlopener.open(link))) url = link;
+            onStatusChanged: if (status == WebView.Ready) bookmarks.urlVisited(url);
+            onDownloadRequested: popupManager.open(Qt.resolvedUrl("SaveFileDialog.qml"), window, {request: request})
         }
         
         Keys.onPressed: {
@@ -196,48 +213,6 @@ ApplicationWindow {
                 }
 
                 break;
-            case Qt.Key_Backspace:
-                if (event.modifiers == Qt.ShiftModifier) {
-                    webView.forward();
-                }
-                
-                break;
-            case Qt.Key_R:
-                if (event.modifiers == Qt.ControlModifier) {
-                    webView.reload();
-                }
-                
-                break;
-            case Qt.Key_F:
-                if (event.modifiers == Qt.ControlModifier) {
-                    findToolBar.visible = true;
-                }
-                
-                break;
-            case Qt.Key_N:
-                if (event.modifiers == Qt.ControlModifier) {
-                    window.loadBrowserWindow();
-                }
-                
-                break;
-            case Qt.Key_B:
-                if (event.modifiers == Qt.ControlModifier) {
-                    windowStack.push(Qt.resolvedUrl("BookmarksWindow.qml"));
-                }
-                
-                break;
-            case Qt.Key_O:
-                if (event.modifiers == Qt.ControlModifier) {
-                    dialogs.showFileDialog();
-                }
-                
-                break;
-            case Qt.Key_D:
-                if (event.modifiers == Qt.ControlModifier) {
-                    dialogs.showBookmarkDialog(webView.title, webView.url);
-                }
-                
-                break;
             case Qt.Key_F8:
                 webView.zoomFactor -= 0.1;
                 break;
@@ -252,153 +227,178 @@ ApplicationWindow {
         }
     }
     
-    /*PanningArea {
-        id: panningArea
-
-        anchors.fill: parent
+    Loader {
+        id: findLoader
+        
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: toolLoader.top
+        }
     }
     
-    PanningIndicator {
-        id: panningIndicator
-
-        visible: panningArea.pointerOn
-        panningOn: panningArea.panningOn
-        onClicked: panningArea.panningOn = !panningArea.panningOn
-    }*/
+    Loader {
+        id: toolLoader
         
-    ToolBar {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+        sourceComponent: (!window.fullScreen) || ((webView.status == WebView.Loading)
+        && (qmlBrowserSettings.forceToolBarVisibleWhenLoading)) ? toolBar : undefined
+    }
+    
+    Loader {
+        id: fullscreenLoader
+        
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            margins: -10
+        }
+        sourceComponent: toolLoader.item ? undefined : fullscreenIndicator
+    }
+    
+    Component {
         id: findToolBar
-
-        anchors.bottom: toolBar.visible ? toolBar.top : parent.bottom
-        visible: false
-        onVisibleChanged: if (visible) findInput.forceActiveFocus();
-
-        Label {
-            height: 70
-            width: 70
-            verticalAlignment: Text.AlignVCenter
-            text: qsTr("Find") + ": "
-        }
-
-        TextField {
-            id: findInput
-
-            width: parent.width - 140
-            onAccepted: if (!webView.findText(text)) informationBox.information(qsTr("No matches found"));
-        }
-
-        ToolButton {
-            iconName: "general_close"
-            onClicked: {
-                webView.findText("");
-                findToolBar.visible = false;
+        
+        ToolBar {
+            id: bar
+                        
+            Label {
+                height: 70
+                width: 70
+                verticalAlignment: Text.AlignVCenter
+                text: qsTr("Find") + ": "
             }
-        }
-    }    
-
-    ToolBar {
-        id: toolBar
-
-        height: 75
-        anchors.bottom: parent.bottom
-        visible: (!window.fullScreen) || ((webView.status == WebView.Loading)
-                                          && (qmlBrowserSettings.forceToolBarVisibleWhenLoading))
-
-        Timer {
-            id: historyTimer
-
-            interval: 800
-            onTriggered: windowStack.push(Qt.resolvedUrl("RecentHistoryWindow.qml"))
-        }
-
-        ToolButton {
-            width: 75
-            height: 75
-            iconName: "general_back"
-            onPressedChanged: {
-                if (pressed) {
-                    historyTimer.restart();
-                }
-                else {
-                    if (historyTimer.running) {
-                        webView.back();
-                    }
-
-                    historyTimer.stop();
+            
+            TextField {
+                id: findInput
+                
+                width: bar.width - 140
+                onAccepted: if (!webView.findText(text)) informationBox.information(qsTr("No matches found"));
+            }
+            
+            ToolButton {
+                iconName: "general_close"
+                onClicked: {
+                    webView.findText("");
+                    findLoader.sourceComponent = undefined;
                 }
             }
-        }
-
-        ToolButton {
-            width: 75
-            height: 75
-            iconName: "general_forward"
-            onPressedChanged: {
-                if (pressed) {
-                    historyTimer.restart();
-                }
-                else {
-                    if (historyTimer.running) {
-                        webView.forward();
-                    }
-
-                    historyTimer.stop();
-                }
-            }
-        }
-
-        UrlInputField {
-            id: urlInput
-
-            width: parent.width - (webView.status == WebView.Loading ? 375 : 300)
-            showProgressIndicator: webView.status == WebView.Loading
-            progress: webView.progress
-            comboboxEnabled: webHistory.count > 0
-            onComboboxTriggered: viewLoader.sourceComponent = (viewLoader.item ? undefined : historyView)
-            onTextChanged: {
-                if (text) {
-                    viewLoader.sourceComponent = searchView;
-                    viewLoader.item.query = text;
-                }
-                else {
-                    viewLoader.sourceComponent = undefined;
-                }
-            }
-            onFocusChanged: if ((!focus) && (viewLoader.item)
-                                && (!viewLoader.item.focus)) viewLoader.sourceComponent = undefined;
-            onAccepted: webView.url = urlFromTextInput(text)
-
-            Timer {
-                interval: 50
-                running: urlInput.focus
-                onTriggered: urlInput.selectAll()
-            }
-        }
-
-        ToolButton {
-            width: 75
-            height: 75
-            iconName: "general_stop"
-            visible: webView.status == WebView.Loading
-            onClicked: webView.stop()
-        }
-
-        ToolButton {
-            width: 75
-            height: 75
-            iconName: "general_mybookmarks_folder"
-            onClicked: windowStack.push(Qt.resolvedUrl("BookmarksWindow.qml"))
-        }
-
-        ToolButton {
-            width: 75
-            height: 75
-            iconName: "general_fullsize"
-            onClicked: window.fullScreen ? window.showNormal() : window.showFullScreen()
+            
+            Component.onCompleted: findInput.forceActiveFocus()
         }
     }
-
-    FullscreenIndicator {}
+    
+    Component {
+        id: toolBar
+        
+        ToolBar {
+            id: bar
+            
+            height: 75
+            
+            Timer {
+                id: historyTimer
+                
+                interval: 800
+                onTriggered: windowStack.push(Qt.resolvedUrl("HistoryWindow.qml"))
+            }
+            
+            ToolButton {
+                width: 75
+                height: 75
+                iconName: "general_back"
+                onPressedChanged: {
+                    if (pressed) {
+                        historyTimer.restart();
+                    }
+                    else {
+                        if (historyTimer.running) {
+                            webView.back();
+                        }
+                        
+                        historyTimer.stop();
+                    }
+                }
+            }
+            
+            ToolButton {
+                width: 75
+                height: 75
+                iconName: "general_forward"
+                onPressedChanged: {
+                    if (pressed) {
+                        historyTimer.restart();
+                    }
+                    else {
+                        if (historyTimer.running) {
+                            webView.forward();
+                        }
+                        
+                        historyTimer.stop();
+                    }
+                }
+            }
+            
+            UrlInputField {
+                id: urlInput
+                
+                width: bar.width - (webView.status == WebView.Loading ? 375 : 300)
+                showProgressIndicator: webView.status == WebView.Loading
+                progress: webView.progress
+                onAccepted: webView.url = urlFromTextInput(text)
+                
+                Timer {
+                    interval: 50
+                    running: urlInput.focus
+                    onTriggered: urlInput.selectAll()
+                }
+                
+                Connections {
+                    target: webView
+                    onUrlChanged: {
+                        urlInput.text = webView.url;
+                        urlInput.cursorPosition = 0;
+                    }
+                }
+            }
+            
+            ToolButton {
+                width: 75
+                height: 75
+                iconName: "general_stop"
+                visible: webView.status == WebView.Loading
+                onClicked: webView.stop()
+            }
+            
+            ToolButton {
+                width: 75
+                height: 75
+                action: bookmarksAction
+            }
+            
+            ToolButton {
+                width: 75
+                height: 75
+                iconName: "general_fullsize"
+                onClicked: window.fullScreen ? window.showNormal() : window.showFullScreen()
+            }            
+            
+            Component.onCompleted: {
+                urlInput.text = webView.url;
+                urlInput.cursorPosition = 0;
+            }
+        }
+    }
+    
+    Component {
+        id: fullscreenIndicator
+        
+        FullscreenIndicator {}
+    }
 
     InformationBox {
         id: informationBox
@@ -426,117 +426,6 @@ ApplicationWindow {
             color: platformStyle.reversedTextColor
         }
     }
-
-    ScreenShot {
-        id: screenshot
-
-        //target: webView
-        target: window
-        targetHeight: Math.min(flicker.height, window.height * 0.6)
-        fileName: "/home/user/.config/QMLBrowser/.cache/" + Qt.md5(webView.url) + ".jpg"
-        overwriteExistingFile: true
-        smooth: true
-    }
-
-    Loader {
-        id: viewLoader
-        
-        anchors {
-            left: parent.left
-            leftMargin: platformStyle.paddingMedium
-            right: parent.right
-            rightMargin: platformStyle.paddingMedium
-            bottom: toolBar.top
-        }
-        height: item ? Math.min(item.count * 70, 280) : 0
-    }
-
-    QtObject {
-        id: dialogs
-        
-        property DownloadsDialog downloadsDialog
-        property SettingsDialog settingsDialog
-        property FileDialog fileDialog
-        property SaveFileDialog saveFileDialog
-        property NewBookmarkDialog bookmarkDialog
-        property NewSearchEngineDialog searchEngineDialog
-        
-        function showDownloadsDialog() {
-            if (!downloadsDialog) {
-                downloadsDialog = downloadsDialogComponent.createObject(window)
-            }
-            
-            downloadsDialog.open();
-        }
-        
-        function showSettingsDialog() {
-            if (!settingsDialog) {
-                settingsDialog = settingsDialogComponent.createObject(window);
-            }
-            
-            settingsDialog.open();
-        }
-        
-        function showFileDialog() {
-            if (!fileDialog) {
-                fileDialog = fileDialogComponent.createObject(window);
-            }
-            
-            fileDialog.open();
-        }
-        
-        function showSaveFileDialog(fileName, request) {
-            if (!saveFileDialog) {
-                saveFileDialog = saveFileDialogComponent.createObject(window);
-            }
-            
-            saveFileDialog.fileName = fileName;
-            saveFileDialog.request = request;
-            saveFileDialog.open();
-        }
-        
-        function showBookmarkDialog(name, address) {
-            if (!bookmarkDialog) {
-                bookmarkDialog = bookmarkDialogComponent.createObject(window);
-            }
-            
-            bookmarkDialog.name = name;
-            bookmarkDialog.address = address;
-            bookmarkDialog.open();
-        }
-        
-        function showSearchEngineDialog() {
-            if (!searchEngineDialog) {
-                searchEngineDialog = searchEngineDialogComponent.createObject(window);
-            }
-            
-            searchEngineDialog.open();
-        }
-    }
-    
-    Component {
-        id: historyView
-        
-        HistoryView {}
-    }
-    
-    Component {
-        id: searchView
-        
-        SearchEngineView {}
-    }
-    
-    Component {
-        id: downloadsDialogComponent
-        
-        DownloadsDialog {}
-    }
-    
-    Component {
-        id: settingsDialogComponent
-        
-        SettingsDialog {}
-    }
     
     Component {
         id: fileDialogComponent
@@ -546,32 +435,7 @@ ApplicationWindow {
         }
     }
     
-    Component {
-        id: saveFileDialogComponent
-        
-        SaveFileDialog {}
-    }
-    
-    Component {
-        id: bookmarkDialogComponent
-        
-        NewBookmarkDialog {}
-    }
-    
-    Component {
-        id: searchEngineDialogComponent
-        
-        NewSearchEngineDialog {}
-    }
-    
-    Component.onCompleted: {
-        if (qmlBrowserSettings.zoomWithVolumeKeys) {
-            volumeKeys.grab(window);
-        }
-        
-        webView.linkClicked.connect(webView.openUrl);
-    }
-    
+    Component.onCompleted: if (qmlBrowserSettings.zoomWithVolumeKeys) volumeKeys.grab(window);
     Component.onDestruction: {
         volumeKeys.release(window);
         webHistory.save();

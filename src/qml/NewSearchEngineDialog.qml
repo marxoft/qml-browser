@@ -51,7 +51,7 @@ Dialog {
 
         Label {
             width: parent.width
-            text: qsTr("Address") + " (" + qsTr("replace query string with") + " '%QUERY%')"
+            text: qsTr("Address (%q for query)")
         }
 
         TextField {
@@ -68,7 +68,7 @@ Dialog {
             width: parent.width
             text: qsTr("Icon path (optional)")
             valueText: iconPath ? iconPath : qsTr("None chosen")
-            onClicked: fileDialog.open()
+            onClicked: popupManager.open(fileDialog, root)
         }
     }
 
@@ -79,6 +79,7 @@ Dialog {
             right: parent.right
             bottom: parent.bottom
         }
+        style: DialogButtonStyle {}
         text: qsTr("Save")
         enabled: (nameInput.text != "") && (addressInput.text != "")
         onClicked: root.accept()
@@ -116,24 +117,19 @@ Dialog {
             }
         }
     }
+    
+    Component {
+        id: fileDialog
+        
+        FileDialog {        
+            onAccepted: iconSelector.iconPath = filePath
+        }
+    }
 
-    onStatusChanged: if (status == DialogStatus.Open) nameInput.forceActiveFocus();
     onAccepted: {
         searchEngines.addSearchEngine(nameInput.text, iconSelector.iconPath, addressInput.text);
         informationBox.information(qsTr("Search engine added"));
-        nameInput.clear();
-        addressInput.clear();
-        iconSelector.iconPath = "";
-    }
-    onRejected: {
-        nameInput.clear();
-        addressInput.clear();
-        iconSelector.iconPath = "";
     }
     
-    FileDialog {
-        id: fileDialog
-        
-        onAccepted: iconSelector.iconPath = filePath
-    }
+    Component.onCompleted: nameInput.forceActiveFocus()
 }

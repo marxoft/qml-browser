@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Stuart Howarth <showarth@marxoft.co.uk>
+ * Copyright (C) 2016 Stuart Howarth <showarth@marxoft.co.uk>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3 as
@@ -16,36 +16,32 @@
 
 import QtQuick 1.0
 import org.hildon.components 1.0
-import org.hildon.browser 1.0
 
-Window {
+ListItem {
     id: root
-
-    title: qsTr("Complete browsing history")
-
-    ListView {
-        id: view
-
-        anchors.fill: parent
-        horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-        model: webHistory.urls
-        delegate: HistoryDelegate {
-            onClicked: {
-                window.url = webHistory.urls[index];
-                windowStack.pop(window);
-            }
-        }
-    }
-
+    
     Label {
         anchors {
-            fill: parent
+            left: parent.left
+            right: parent.right
+            top: parent.top
             margins: platformStyle.paddingMedium
         }
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        color: platformStyle.disabledTextColor
-        text: qsTr("(No history)")
-        visible: webHistory.urls.length === 0
+        elide: Text.ElideRight
+        text: name
+    }
+    
+    Label {
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: platformStyle.paddingMedium
+        }
+        verticalAlignment: Text.AlignBottom
+        elide: Text.ElideRight
+        font.pointSize: platformStyle.fontSizeSmall
+        color: platformStyle.secondaryTextColor
+        text: value
     }
 }
